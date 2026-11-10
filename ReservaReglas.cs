@@ -152,6 +152,46 @@ namespace PROYECTO_RESTAURANTE
             return DebeEstarApartada(fechaHora, ahora);
         }
 
+        // ------------------------------------------------------------------
+        // PEDIDOS NUEVOS EN UNA MESA CON RESERVA PRÓXIMA
+        // No se abre un pedido nuevo de salón en una mesa cuya reserva
+        // confirmada empieza dentro de DuracionReservaMinutos (2 horas) o
+        // aún está en su tolerancia: el pedido impediría apartarla. Cuando el
+        // cliente de la reserva llega (llegada confirmada) la reserva queda
+        // 'finalizada' y su pedido se abre con normalidad.
+        // Devuelve el motivo para el usuario, o null si se puede abrir.
+        // Con transacción, bloquea las reservas leídas (UPDLOCK, HOLDLOCK).
+        // ------------------------------------------------------------------
+        public static string MotivoReservaProxima(SqlConnection conexion, SqlTransaction tx, int idMesa)
+        {
+            string sql = SqlAhora + @"
+                SELECT TOP (1) R.id_reserva, R.fecha_hora, R.nombre_cliente, M.[número]
+                FROM dbo.RESERVA_MESA R" + (tx != null ? " WITH (UPDLOCK, HOLDLOCK)" : "") + @"
+                INNER JOIN dbo.MESA M ON M.id_mesa = R.id_mesa
+                WHERE R.id_mesa = @Mesa
+                  AND R.estado = 'confirmada'
+                  AND R.fecha_hora < DATEADD(MINUTE, @Duracion, @Ahora)
+                  AND DATEADD(MINUTE, @Tolerancia, R.fecha_hora) > @Ahora
+                ORDER BY R.fecha_hora, R.id_reserva;";
+            using (SqlCommand cmd = new SqlCommand(sql, conexion, tx))
+            {
+                AgregarParametros(cmd);
+                cmd.Parameters.Add("@Duracion", SqlDbType.Int).Value = DuracionReservaMinutos;
+                cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
+                using (SqlDataReader rd = cmd.ExecuteReader())
+                {
+                    if (!rd.Read())
+                        return null;
+                    return "La Mesa " + rd[3] + " tiene la reserva N.º " + rd[0] + " a las " +
+                           Convert.ToDateTime(rd[1]).ToString("HH:mm") + " (" + Convert.ToString(rd[2]) + ").\n\n" +
+                           "No se abren pedidos nuevos en una mesa desde " + (DuracionReservaMinutos / 60) +
+                           " horas antes de su reserva, para no comprometerla. Elija otra mesa.\n\n" +
+                           "Si es el cliente de la reserva, confirme su llegada en Gestión de Mesas " +
+                           "(desde " + LlegadaAnticipadaMinutos + " minutos antes).";
+                }
+            }
+        }
+
         // Texto para el usuario: cuándo se apartará la mesa.
         public static string TextoApartado(DateTime fechaHora)
         {

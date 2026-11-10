@@ -1649,6 +1649,26 @@ namespace PROYECTO_RESTAURANTE
                     return;
                 }
 
+                // Mesa libre con una reserva próxima (regla de ReservaReglas):
+                // no se abre un pedido que impida apartarla.
+                string reservaProxima;
+                using (SqlConnection conexion = new SqlConnection(cadenaConexion))
+                {
+                    conexion.Open();
+                    reservaProxima = ReservaReglas.MotivoReservaProxima(conexion, null, info.IdMesa);
+                }
+                if (reservaProxima != null)
+                {
+                    MessageBox.Show(
+                        reservaProxima,
+                        "Mesa con reserva próxima",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+
+                    CargarMesasDisponibles();
+                    return;
+                }
+
                 // Si ya estaba seleccionada, no hacer nada.
                 if (idMesaSeleccionada.HasValue &&
                     idMesaSeleccionada.Value == info.IdMesa &&
@@ -1928,6 +1948,13 @@ namespace PROYECTO_RESTAURANTE
                     throw new Exception(
                         "El pedido de Salón necesita una mesa.");
                 }
+
+                // Reserva próxima de la mesa: no se abre el pedido
+                // (se vuelve a comprobar aquí, en la misma transacción).
+                string reservaProxima = ReservaReglas.MotivoReservaProxima(
+                    conexion, transaccion, idMesa.Value);
+                if (reservaProxima != null)
+                    throw new Exception(reservaProxima);
 
                 if (!idMesero.HasValue)
                 {

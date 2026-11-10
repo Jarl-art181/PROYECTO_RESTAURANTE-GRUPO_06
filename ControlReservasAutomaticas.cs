@@ -29,7 +29,7 @@ namespace PROYECTO_RESTAURANTE
         private const int IntervaloMaximo = 60000;
         private const int TiempoComando = 15;          // segundos (no se amplía)
         private const int ToleranciaMinutos = ReservaReglas.ToleranciaLlegadaMinutos;
-        private const int ApartadoMinutos = ReservaReglas.ApartadoMinutos;
+        private const int LlegadaAnticipadaMinutos = ReservaReglas.LlegadaAnticipadaMinutos;
         private const int AvisoMinutos = 15;
 
         // Cadena centralizada en App.config (ver BaseDatos).
@@ -123,7 +123,7 @@ namespace PROYECTO_RESTAURANTE
             try
             {
                 List<ReservaAviso> vencidas = LiberarReservasVencidas();
-                bool apartadas = ApartarMesasProximas() > 0;
+                bool apartadas = SincronizarMesas() > 0;
 
                 // Las preguntas solo tienen sentido con alguien en sesión.
                 List<ReservaAviso> avisos = SesionActual.Iniciada && Permisos.AtiendeReservas(SesionActual.Cargo)
@@ -300,7 +300,7 @@ namespace PROYECTO_RESTAURANTE
         // corrección), pero nunca mesas ocupadas por otro pedido.
         private static List<ReservaAviso> MarcarYObtenerAvisos15()
         {
-            const string sql = @"
+            const string sql = ReservaReglas.SqlAhora + @"
                 UPDATE R
                 SET aviso_15 = 1
                 OUTPUT INSERTED.id_reserva, INSERTED.id_mesa,
@@ -311,8 +311,8 @@ namespace PROYECTO_RESTAURANTE
                   AND R.estado = 'confirmada'
                   AND R.aviso_15 = 0
                   AND LOWER(LTRIM(RTRIM(M.estado))) IN ('reservada', 'libre')
-                  AND DATEADD(MINUTE, @Aviso, R.fecha_hora) <= SYSDATETIME()
-                  AND DATEADD(MINUTE, @Tolerancia, R.fecha_hora) > SYSDATETIME();";
+                  AND DATEADD(MINUTE, @Aviso, R.fecha_hora) <= @Ahora
+                  AND DATEADD(MINUTE, @Tolerancia, R.fecha_hora) > @Ahora;";
 
             List<ReservaAviso> avisos = new List<ReservaAviso>();
             using (SqlConnection conexion = new SqlConnection(CadenaConexion))
@@ -321,7 +321,7 @@ namespace PROYECTO_RESTAURANTE
                 cmd.CommandTimeout = TiempoComando;
                 cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
                 cmd.Parameters.Add("@Aviso", SqlDbType.Int).Value = AvisoMinutos;
-                cmd.Parameters.Add("@Tolerancia", SqlDbType.Int).Value = ToleranciaMinutos;
+                ReservaReglas.AgregarParametros(cmd);
                 conexion.Open();
                 using (SqlDataReader lector = cmd.ExecuteReader())
                 {
@@ -341,12 +341,24 @@ namespace PROYECTO_RESTAURANTE
             return avisos;
         }
 
-        // Aparta (estado 'reservada') las mesas libres, sin pedido en curso,
-        // cuya reserva confirmada empieza dentro de ApartadoMinutos. Así una
-        // reserva para otro día no bloquea la mesa hasta que se acerca.
-        private static int ApartarMesasProximas()
+        // ======================================================
+        // SINCRONIZACIÓN MESA <-> RESERVAS (regla única de ReservaReglas)
+        // ------------------------------------------------------
+        // 1. Aparta ('reservada') la mesa libre, sin pedido activo, cuya
+        //    reserva confirmada ya debe estar apartada: la de las 11:00
+        //    desde el inicio de ese día; las demás 15 minutos antes.
+        // 2. Devuelve a 'libre' la mesa 'reservada' que no tiene ninguna
+        //    reserva que deba apartarla ahora ni pedido activo (por ejemplo,
+        //    apartada con la regla anterior de 60 minutos o con su reserva
+        //    ya cerrada). Nunca toca mesas ocupadas ni con pedido activo.
+        // Se ejecuta al guardar reservas, al abrir Mesas y cada 10 s.
+        // Devuelve cuántas mesas cambiaron.
+        // ======================================================
+        internal static int SincronizarMesas()
         {
-            const string sql = @"
+            const string sql = ReservaReglas.SqlAhora + @"
+                DECLARE @Apartadas INT, @Liberadas INT;
+
                 UPDATE M SET estado = 'reservada'
                 FROM dbo.MESA M WITH (UPDLOCK, HOLDLOCK)
                 WHERE M.id_sucursal = @Sucursal
@@ -354,25 +366,50 @@ namespace PROYECTO_RESTAURANTE
                   AND EXISTS (
                       SELECT 1 FROM dbo.RESERVA_MESA R
                       WHERE R.id_mesa = M.id_mesa AND R.estado = 'confirmada'
-                        AND R.fecha_hora <= DATEADD(MINUTE, @Apartado, SYSDATETIME())
-                        AND DATEADD(MINUTE, @Tolerancia, R.fecha_hora) > SYSDATETIME())
+                        AND " + ReservaReglas.SqlDebeEstarApartada + @")
                   AND NOT EXISTS (
                       SELECT 1 FROM dbo.PEDIDO P
                       WHERE P.id_mesa = M.id_mesa AND P.canal = 'salon'
-                        AND P.estado IN ('pendiente','en_preparacion','listo','entregado'));";
+                        AND P.estado IN ('pendiente','en_preparacion','listo','entregado'));
+                SET @Apartadas = @@ROWCOUNT;
+
+                UPDATE M SET estado = 'libre'
+                FROM dbo.MESA M WITH (UPDLOCK, HOLDLOCK)
+                WHERE M.id_sucursal = @Sucursal
+                  AND LOWER(LTRIM(RTRIM(M.estado))) = 'reservada'
+                  AND NOT EXISTS (
+                      SELECT 1 FROM dbo.RESERVA_MESA R
+                      WHERE R.id_mesa = M.id_mesa AND R.estado = 'confirmada'
+                        AND " + ReservaReglas.SqlDebeEstarApartada + @")
+                  AND NOT EXISTS (
+                      SELECT 1 FROM dbo.PEDIDO P
+                      WHERE P.id_mesa = M.id_mesa AND P.canal = 'salon'
+                        AND P.estado IN ('pendiente','en_preparacion','listo','entregado'));
+                SET @Liberadas = @@ROWCOUNT;
+
+                SELECT @Apartadas, @Liberadas;";
 
             using (SqlConnection conexion = new SqlConnection(CadenaConexion))
             using (SqlCommand cmd = new SqlCommand(sql, conexion))
             {
                 cmd.CommandTimeout = TiempoComando;
                 cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
-                cmd.Parameters.Add("@Apartado", SqlDbType.Int).Value = ApartadoMinutos;
-                cmd.Parameters.Add("@Tolerancia", SqlDbType.Int).Value = ToleranciaMinutos;
+                ReservaReglas.AgregarParametros(cmd);
                 conexion.Open();
-                int n = cmd.ExecuteNonQuery();
-                if (n > 0)
-                    Registro.Info("Reservas", n + " mesa(s) apartada(s) por reservas próximas.");
-                return n;
+                int apartadas = 0, liberadas = 0;
+                using (SqlDataReader rd = cmd.ExecuteReader())
+                {
+                    if (rd.Read())
+                    {
+                        apartadas = rd.GetInt32(0);
+                        liberadas = rd.GetInt32(1);
+                    }
+                }
+                if (apartadas > 0)
+                    Registro.Info("Reservas", apartadas + " mesa(s) apartada(s) por reservas próximas.");
+                if (liberadas > 0)
+                    Registro.Info("Reservas", liberadas + " mesa(s) reservada(s) sin reserva vigente vuelven a libre.");
+                return apartadas + liberadas;
             }
         }
 
@@ -381,13 +418,13 @@ namespace PROYECTO_RESTAURANTE
         // y una reserva con la mesa liberada quedaba confirmada para siempre).
         private static List<ReservaAviso> LiberarReservasVencidas()
         {
-            const string consulta = @"
+            const string consulta = ReservaReglas.SqlAhora + @"
                 SELECT R.id_reserva
                 FROM dbo.RESERVA_MESA R
                 INNER JOIN dbo.MESA M ON M.id_mesa = R.id_mesa
                 WHERE M.id_sucursal = @Sucursal
                   AND R.estado = 'confirmada'
-                  AND DATEADD(MINUTE, @Tolerancia, R.fecha_hora) <= SYSDATETIME();";
+                  AND DATEADD(MINUTE, @Tolerancia, R.fecha_hora) <= @Ahora;";
 
             List<int> candidatas = new List<int>();
             using (SqlConnection conexion = new SqlConnection(CadenaConexion))
@@ -395,7 +432,7 @@ namespace PROYECTO_RESTAURANTE
             {
                 cmd.CommandTimeout = TiempoComando;
                 cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
-                cmd.Parameters.Add("@Tolerancia", SqlDbType.Int).Value = ToleranciaMinutos;
+                ReservaReglas.AgregarParametros(cmd);
                 conexion.Open();
                 using (SqlDataReader lector = cmd.ExecuteReader())
                 {
@@ -463,11 +500,12 @@ namespace PROYECTO_RESTAURANTE
                         if (!existe) { tx.Rollback(); return null; }
 
                         using (SqlCommand cmd = Comando(@"
-                            SELECT nombre_cliente, fecha_hora, estado, SYSDATETIME() AS ahora
+                            SELECT nombre_cliente, fecha_hora, estado, DATEADD(SECOND, @Desfase, SYSDATETIME()) AS ahora
                             FROM dbo.RESERVA_MESA WITH (UPDLOCK, HOLDLOCK)
                             WHERE id_reserva = @Reserva;", conexion, tx))
                         {
                             cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
+                            cmd.Parameters.Add("@Desfase", SqlDbType.Int).Value = (int)ReservaReglas.DesfasePruebas.TotalSeconds;
                             using (SqlDataReader rd = cmd.ExecuteReader())
                             {
                                 existe = rd.Read();
@@ -554,12 +592,12 @@ namespace PROYECTO_RESTAURANTE
 
         private static bool TieneOtraReservaConfirmada(SqlConnection conexion, SqlTransaction tx, int idMesa, int idReserva)
         {
-            using (SqlCommand cmd = Comando(@"
-                SELECT COUNT(*) FROM dbo.RESERVA_MESA WITH (UPDLOCK, HOLDLOCK)
-                WHERE id_mesa = @Mesa AND id_reserva <> @Reserva AND estado = 'confirmada'
-                  AND fecha_hora <= DATEADD(MINUTE, @Apartado, SYSDATETIME());", conexion, tx))
+            using (SqlCommand cmd = Comando(ReservaReglas.SqlAhora + @"
+                SELECT COUNT(*) FROM dbo.RESERVA_MESA R WITH (UPDLOCK, HOLDLOCK)
+                WHERE R.id_mesa = @Mesa AND R.id_reserva <> @Reserva AND R.estado = 'confirmada'
+                  AND " + ReservaReglas.SqlDebeEstarApartada + ";", conexion, tx))
             {
-                cmd.Parameters.Add("@Apartado", SqlDbType.Int).Value = ApartadoMinutos;
+                ReservaReglas.AgregarParametros(cmd);
                 cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
                 cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
                 return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
@@ -646,11 +684,12 @@ namespace PROYECTO_RESTAURANTE
                         DateTime fechaHora, ahoraServidor;
                         string estadoReserva;
                         using (SqlCommand cmd = Comando(@"
-                            SELECT fecha_hora, estado, SYSDATETIME() AS ahora
+                            SELECT fecha_hora, estado, DATEADD(SECOND, @Desfase, SYSDATETIME()) AS ahora
                             FROM dbo.RESERVA_MESA WITH (UPDLOCK, HOLDLOCK)
                             WHERE id_reserva = @Reserva AND id_mesa = @Mesa;", conexion, tx))
                         {
                             cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
+                            cmd.Parameters.Add("@Desfase", SqlDbType.Int).Value = (int)ReservaReglas.DesfasePruebas.TotalSeconds;
                             cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
                             using (SqlDataReader rd = cmd.ExecuteReader())
                             {
@@ -665,9 +704,9 @@ namespace PROYECTO_RESTAURANTE
                             throw new Exception("La reserva ya fue atendida o cancelada.");
                         if (estadoMesa != "reservada" && estadoMesa != "libre")
                             throw new Exception("La mesa está " + estadoMesa + ": no se puede confirmar la llegada.");
-                        if (ahoraServidor < fechaHora.AddMinutes(-ApartadoMinutos))
+                        if (ahoraServidor < fechaHora.AddMinutes(-LlegadaAnticipadaMinutos))
                             throw new Exception("La reserva es para el " + fechaHora.ToString("dd/MM/yyyy 'a las' HH:mm") +
-                                ": la llegada se confirma desde " + ApartadoMinutos + " minutos antes.");
+                                ": la llegada se confirma desde " + LlegadaAnticipadaMinutos + " minutos antes.");
                         if (ahoraServidor >= fechaHora.AddMinutes(ToleranciaMinutos))
                             throw new Exception("La reserva superó los " + ToleranciaMinutos + " minutos de tolerancia.");
                         if (TienePedidoActivo(conexion, tx, idMesa))

@@ -503,8 +503,8 @@ namespace PROYECTO_RESTAURANTE
                 "Mesa " + (fila == null ? "" : fila["numero"].ToString()) + ", " +
                 fechaReserva.Value.ToString("dd/MM/yyyy 'a las' HH:mm") + ".\n" +
                 "Tolerancia de llegada: " + ReservaReglas.ToleranciaLlegadaMinutos + " minutos." +
-                (apartada ? "" : "\nLa mesa se apartará automáticamente " + ReservaReglas.ApartadoMinutos +
-                                 " minutos antes de la hora reservada."),
+                (apartada ? "\nLa mesa ya figura como reservada."
+                          : "\nLa mesa se apartará automáticamente " + ReservaReglas.TextoApartado(fechaReserva.Value) + "."),
                 "Reserva registrada", MessageBoxButtons.OK, MessageBoxIcon.Information);
             DialogResult = DialogResult.OK;
             Close();
@@ -603,8 +603,7 @@ namespace PROYECTO_RESTAURANTE
                     try
                     {
                         DateTime ahora;
-                        using (SqlCommand cmd = new SqlCommand("SELECT SYSDATETIME();", conexion, transaccion))
-                            ahora = Convert.ToDateTime(cmd.ExecuteScalar());
+                        ahora = ReservaReglas.AhoraServidor(conexion, transaccion);
 
                         if (!ReservaReglas.HorarioValido(fechaReserva, ahora))
                             throw new Exception("La hora elegida ya pasó o queda fuera del horario de atención (" +
@@ -690,7 +689,8 @@ namespace PROYECTO_RESTAURANTE
                             idReserva = Convert.ToInt32(cmd.ExecuteScalar());
                         }
 
-                        // Reserva cercana: la mesa queda apartada desde ahora.
+                        // Si ya llegó su momento de apartado (11:00: desde el inicio del día;
+                        // otras horas: 15 min antes), la mesa queda apartada desde ahora.
                         if (ReservaReglas.SeApartaAlRegistrar(fechaReserva, ahora))
                         {
                             using (SqlCommand cmd = new SqlCommand(@"

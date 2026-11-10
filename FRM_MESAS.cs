@@ -24,6 +24,11 @@ namespace PROYECTO_RESTAURANTE
         private readonly string cadenaConexion =
     BaseDatos.CadenaConexion;
 
+        // Aviso discreto de reserva futura (mesa aún libre): borde dorado y ayuda.
+        private readonly ToolTip ayudaReservas = new ToolTip();
+        private Color? bordeEstadoOriginal;
+        private int grosorEstadoOriginal;
+
         public FRM_MESAS()
         {
 
@@ -32,6 +37,7 @@ namespace PROYECTO_RESTAURANTE
             this.VisibleChanged += FRM_MESAS_VisibleChanged;
             this.FormClosed += (s, args) =>
                 ControlReservasAutomaticas.MesasActualizadas -= RefrescarMesasAutomaticamente;
+            this.FormClosed += (s, args) => ayudaReservas.Dispose();
 
             // Conectar el botón Liberar mesa.
             btnLiberarMesa.Click -= btnLiberarMesa_Click;
@@ -77,6 +83,10 @@ namespace PROYECTO_RESTAURANTE
                 // Al volver a mostrarse (el Navegador reutiliza esta
                 // ventana) se recargan mesas, contadores y reservas.
                 ControlReservasAutomaticas.MesasActualizadas += RefrescarMesasAutomaticamente;
+                // Estado al día aunque el monitor aún no haya pasado (por
+                // ejemplo, al abrir el sistema después de la hora de apartado).
+                try { ControlReservasAutomaticas.SincronizarMesas(); }
+                catch (Exception ex) { Registro.Error("Reservas", ex); }
                 RefrescarMesasAutomaticamente(null, EventArgs.Empty);
             }
         }
@@ -373,6 +383,14 @@ namespace PROYECTO_RESTAURANTE
         // actualizar el flow de tarjetas de mesa 1 al 10
 
 
+        // Ayuda emergente en el cuadro de estado (y en su texto interno).
+        private void AyudaEstado(Control estado, string texto)
+        {
+            ayudaReservas.SetToolTip(estado, texto);
+            foreach (Control c in estado.Controls)
+                ayudaReservas.SetToolTip(c, texto);
+        }
+
         private void CargarEstadosMesas()
         {
             // ==========================================
@@ -431,11 +449,13 @@ namespace PROYECTO_RESTAURANTE
             // 5. CONSULTAR MESAS EN SQL SERVER
             // ==========================================
 
-            string consulta = @"
+            string consulta = ReservaReglas.SqlAhora + @"
     SELECT
         M.[número] AS NumeroMesa,
         M.estado AS EstadoMesa,
         P.id_pedido AS NumeroPedido,
+        RX.fecha_hora AS ProximaReserva,
+        RX.id_reserva AS NumeroReserva,
 
         LTRIM(RTRIM(
             ISNULL(E.nombre, '') + ' ' +
@@ -467,6 +487,17 @@ namespace PROYECTO_RESTAURANTE
     LEFT JOIN dbo.EMPLEADO E
         ON E.id_empleado = P.id_mesero
 
+    OUTER APPLY
+    (
+        SELECT TOP (1) R.fecha_hora, R.id_reserva
+        FROM dbo.RESERVA_MESA R
+        WHERE R.id_mesa = M.id_mesa
+          AND R.estado = 'confirmada'
+          AND R.fecha_hora > @Ahora
+          AND CAST(R.fecha_hora AS DATE) = CAST(@Ahora AS DATE)
+        ORDER BY R.fecha_hora, R.id_reserva
+    ) RX
+
     WHERE M.id_sucursal = @Sucursal
       AND M.[número] BETWEEN 1 AND 10
 
@@ -485,6 +516,7 @@ namespace PROYECTO_RESTAURANTE
                     {
                         comando.Parameters.Add(
                             "@Sucursal", SqlDbType.Int).Value = 1;
+                        ReservaReglas.AgregarParametros(comando);
 
                         using (SqlDataReader lector =
                             comando.ExecuteReader())
@@ -510,6 +542,16 @@ namespace PROYECTO_RESTAURANTE
 
                                 estados[i].Text = "Sin datos";
                                 estados[i].FillColor = Color.LightGray;
+
+                                // Sin aviso de reserva futura hasta leer los datos.
+                                if (!bordeEstadoOriginal.HasValue)
+                                {
+                                    bordeEstadoOriginal = estados[i].BorderColor;
+                                    grosorEstadoOriginal = estados[i].BorderThickness;
+                                }
+                                estados[i].BorderColor = bordeEstadoOriginal.Value;
+                                estados[i].BorderThickness = grosorEstadoOriginal;
+                                AyudaEstado(estados[i], null);
                             }
 
                             // ==================================
@@ -582,6 +624,18 @@ namespace PROYECTO_RESTAURANTE
 
                                     panelesPedido[posicion].Visible =
                                         false;
+
+                                    // Reserva futura de hoy (aún no apartada): la mesa
+                                    // sigue libre; se indica con un borde dorado y ayuda.
+                                    if (lector["ProximaReserva"] != DBNull.Value)
+                                    {
+                                        DateTime hora = Convert.ToDateTime(lector["ProximaReserva"]);
+                                        estados[posicion].BorderColor = Color.Goldenrod;
+                                        estados[posicion].BorderThickness = 3;
+                                        AyudaEstado(estados[posicion],
+                                            "Reserva N.º " + lector["NumeroReserva"] + " hoy a las " + hora.ToString("HH:mm") +
+                                            ".\nLa mesa se apartará " + ReservaReglas.TextoApartado(hora) + ".");
+                                    }
                                 }
 
                                 // ==============================

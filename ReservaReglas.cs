@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace PROYECTO_RESTAURANTE
 {
@@ -27,9 +29,71 @@ namespace PROYECTO_RESTAURANTE
         // Tolerancia de llegada: pasado este tiempo la reserva vence.
         public const int ToleranciaLlegadaMinutos = 30;
 
-        // La mesa pasa a «reservada» este tiempo antes de la hora reservada
-        // (al registrar la reserva o mediante el monitor automático).
-        public const int ApartadoMinutos = 60;
+        // ------------------------------------------------------------------
+        // APARTADO DE LA MESA (regla única: al guardar y en el monitor)
+        //   * Reserva de la apertura (11:00): la mesa queda «reservada» desde
+        //     el inicio de ESE día (antes de abrir), nunca desde el día anterior.
+        //   * Cualquier otra hora: exactamente 15 minutos antes.
+        //   * Hasta la tolerancia (30 min después), cuando la reserva vence.
+        //   Nunca se aparta una mesa con un pedido activo.
+        // ------------------------------------------------------------------
+        public const int ApartadoPrevioMinutos = 15;
+
+        // Llegada anticipada: el comensal puede confirmar su llegada desde
+        // 60 minutos antes de la hora reservada (y Pedidos vincula su pedido
+        // a la reserva dentro de esa ventana). No cambia con el apartado.
+        public const int LlegadaAnticipadaMinutos = 60;
+
+        // Nombre anterior, que aún usa Pedidos para vincular el pedido a la
+        // reserva con llegada confirmada: es la ventana de llegada anticipada,
+        // NO el apartado de la mesa (ver ApartadoPrevioMinutos).
+        public const int ApartadoMinutos = LlegadaAnticipadaMinutos;
+
+        public static DateTime InicioApartado(DateTime fechaHora)
+        {
+            return fechaHora.TimeOfDay <= HoraApertura
+                ? fechaHora.Date
+                : fechaHora.AddMinutes(-ApartadoPrevioMinutos);
+        }
+
+        // ¿La mesa debe figurar «reservada» ahora por esta reserva confirmada?
+        public static bool DebeEstarApartada(DateTime fechaHora, DateTime ahora)
+        {
+            return ahora >= InicioApartado(fechaHora) &&
+                   ahora < fechaHora.AddMinutes(ToleranciaLlegadaMinutos);
+        }
+
+        // La misma regla en SQL (alias R = RESERVA_MESA, @Ahora declarado con
+        // SqlAhora). Requiere los parámetros de AgregarParametros.
+        public const string SqlDebeEstarApartada = @"
+            @Ahora >= CASE WHEN CAST(R.fecha_hora AS TIME) <= @HoraApertura
+                           THEN CAST(CAST(R.fecha_hora AS DATE) AS DATETIME2)
+                           ELSE DATEADD(MINUTE, -@ApartadoPrevio, R.fecha_hora) END
+            AND @Ahora < DATEADD(MINUTE, @Tolerancia, R.fecha_hora)";
+
+        // «Ahora» del servidor SQL (más el desfase del reloj de pruebas).
+        public const string SqlAhora = "DECLARE @Ahora DATETIME2 = DATEADD(SECOND, @Desfase, SYSDATETIME());";
+
+        // Reloj de pruebas: SOLO las pruebas automáticas lo cambian, para
+        // simular otra hora sin tocar el reloj del sistema. En uso normal es 0.
+        internal static TimeSpan DesfasePruebas = TimeSpan.Zero;
+
+        public static void AgregarParametros(SqlCommand cmd)
+        {
+            cmd.Parameters.Add("@Desfase", SqlDbType.Int).Value = (int)DesfasePruebas.TotalSeconds;
+            cmd.Parameters.Add("@HoraApertura", SqlDbType.Time).Value = HoraApertura;
+            cmd.Parameters.Add("@ApartadoPrevio", SqlDbType.Int).Value = ApartadoPrevioMinutos;
+            cmd.Parameters.Add("@Tolerancia", SqlDbType.Int).Value = ToleranciaLlegadaMinutos;
+        }
+
+        public static DateTime AhoraServidor(SqlConnection conexion, SqlTransaction tx)
+        {
+            using (SqlCommand cmd = new SqlCommand("SELECT DATEADD(SECOND, @Desfase, SYSDATETIME());", conexion, tx))
+            {
+                cmd.Parameters.Add("@Desfase", SqlDbType.Int).Value = (int)DesfasePruebas.TotalSeconds;
+                return Convert.ToDateTime(cmd.ExecuteScalar());
+            }
+        }
 
         public const int DiasAnticipacionMaxima = 30;
         public const int MaxPersonasPorMesa = 4;
@@ -77,14 +141,23 @@ namespace PROYECTO_RESTAURANTE
         // Una reserva cercana necesita la mesa libre AHORA (no ocupada por
         // un pedido en curso); una lejana solo necesita que no choque con
         // otra reserva.
+        // También si la mesa debe apartarse ya (reserva de la apertura del día).
         public static bool RequiereMesaLibreAhora(DateTime fechaHora, DateTime ahora)
         {
-            return fechaHora < ahora.AddMinutes(DuracionReservaMinutos);
+            return fechaHora < ahora.AddMinutes(DuracionReservaMinutos) || DebeEstarApartada(fechaHora, ahora);
         }
 
         public static bool SeApartaAlRegistrar(DateTime fechaHora, DateTime ahora)
         {
-            return fechaHora <= ahora.AddMinutes(ApartadoMinutos);
+            return DebeEstarApartada(fechaHora, ahora);
+        }
+
+        // Texto para el usuario: cuándo se apartará la mesa.
+        public static string TextoApartado(DateTime fechaHora)
+        {
+            return fechaHora.TimeOfDay <= HoraApertura
+                ? "desde el inicio del " + fechaHora.ToString("dd/MM/yyyy") + " (reserva de la apertura)"
+                : "a las " + InicioApartado(fechaHora).ToString("HH:mm") + " (" + ApartadoPrevioMinutos + " minutos antes)";
         }
 
         public static string TextoHorario()

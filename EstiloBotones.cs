@@ -114,6 +114,10 @@ namespace PROYECTO_RESTAURANTE
             a(es("promociones y descuentos"), "etiqueta", null);
             a(es("clientes frecuentes"), "personas", null);
             a(es("reservas"), "calendario", null);
+            a(es("historial general"), "historial", null);
+            a(es("todo el historial"), "historial", null);
+            a(es("rango de fechas"), "calendario", null);
+            a(es("ver detalle"), "vista_previa", null);
             return r;
         }
 

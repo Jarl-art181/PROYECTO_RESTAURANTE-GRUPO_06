@@ -96,6 +96,9 @@
     <Compile Include="FRM_REPORTES.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="FRM_REPORTES.Historial.cs">
+      <DependentUpon>FRM_REPORTES.cs</DependentUpon>
+    </Compile>
     <Compile Include="FRM_REPORTES.Designer.cs">
       <DependentUpon>FRM_REPORTES.cs</DependentUpon>
     </Compile>
@@ -187,6 +190,7 @@
     <Compile Include="DisenoVentanas.cs" />
     <Compile Include="SelectorClientes.cs" />
     <Compile Include="TarjetasInventario.cs" />
+    <Compile Include="HistorialDatos.cs" />
     <Compile Include="Imagenes.cs" />
     <Compile Include="Impuestos.cs" />
     <Compile Include="MenuDatos.cs" />

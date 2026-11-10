@@ -73,10 +73,12 @@ namespace PROYECTO_RESTAURANTE
             DisenoVentanas.PonerIcono(guna2PictureBox1, '', Color.Black);
             Text = "Gestión de reportes";
 
+            HashSet<Control> delDiseno = new HashSet<Control>(Controls.Cast<Control>());
             DefinirReportes();
             CrearFiltros();
             CrearTarjetas();
             CrearCuerpo();
+            CrearHistorial(delDiseno);      // apartado «Historial general» (FRM_REPORTES.Historial.cs)
             ElegirPeriodo("mes");
 
             // Libera el calendario interno de los Guna2DateTimePicker (fuga de GDI/USER de Guna).
@@ -103,6 +105,7 @@ namespace PROYECTO_RESTAURANTE
             bool ok = SesionActual.Iniciada && SesionActual.Cargo == Cargos.Administrador;
             foreach (Control c in new Control[] { btnGenerar, btnExcel, btnPdf, tabla })
                 c.Enabled = ok;
+            HabilitarHistorial(ok);
             if (!ok)
             {
                 lblNota.Text = "Solo un Administrador puede consultar los reportes financieros.";
@@ -372,6 +375,11 @@ namespace PROYECTO_RESTAURANTE
         {
             if (!Autorizado())
                 return;
+            if (historialActivo)
+            {
+                CargarHistorial(paginaHistorial);    // al volver a Reportes: historial actualizado
+                return;
+            }
             FiltroReporte f = Filtro();
             lblFiltros.Text = f.Descripcion();
             try
@@ -404,6 +412,8 @@ namespace PROYECTO_RESTAURANTE
         {
             if (!Autorizado())
                 return;
+            if (historialActivo)
+                VerHistorial(false);                 // vuelven filtros, tarjetas, tabla y gráfico
             actual = r;
             for (int i = 0; i < reportes.Count; i++)
                 botonesReporte[i].FillColor = reportes[i] == r ? Dorado : Color.White;

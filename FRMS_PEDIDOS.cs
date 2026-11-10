@@ -164,6 +164,9 @@ namespace PROYECTO_RESTAURANTE
             But_generarboleta.Text = "         Generar recibo";
             guna2HtmlLabel4.Text = "Registra pedidos al instante y genera el recibo de venta";
 
+            // Tasa de IGV académica (Impuestos): la etiqueta sigue a la configuración.
+            guna2HtmlLabel84.Text = Impuestos.Etiqueta(Impuestos.Tasa);
+
             DisenoVentanas.Adaptar(this);
             DisenoVentanas.Encabezado(this, false);
         }
@@ -3912,7 +3915,7 @@ AND NOT EXISTS
         //   descuento        = promoción (vista previa con el motor) o, si no
         //                      hay promoción, los descuentos guardados en SQL
         //                      (por unidad en cada línea + descuento del pedido)
-        //   IGV incluido     = (subtotal - descuento) x 18 / 118
+        //   IGV incluido     = (subtotal - descuento) x tasa / (100 + tasa)  (Impuestos: 10 %, académico)
         //   total            = subtotal - descuento + propina
         private void ActualizarPagos()
         {
@@ -3942,7 +3945,8 @@ AND NOT EXISTS
 
             descuento = Math.Min(Math.Max(descuento, 0), subtotal);
             decimal importe = subtotal - descuento;
-            decimal igv = Math.Round(importe * 18m / 118m, 2, MidpointRounding.AwayFromZero);
+            // Precios con IGV incluido; tasa académica centralizada (Impuestos).
+            decimal igv = Impuestos.IgvIncluido(importe, Impuestos.Tasa);
             decimal total = importe + propinaActual;
 
             MostrarMonto("lblSubtotal", subtotal);

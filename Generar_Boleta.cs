@@ -87,6 +87,8 @@ namespace PROYECTO_RESTAURANTE
         private string promocionPedido;
         private decimal propina = 0m;
         private decimal igvIncluido = 0m;
+        private decimal tasaIgv = Impuestos.Tasa;   // la del cobro (reimpresión: la de su fecha)
+        private DateTime? fechaCobro;               // solo pedidos ya cobrados
         private decimal total = 0m;
 
         private readonly List<LineaBoleta> productos = new List<LineaBoleta>();
@@ -1261,8 +1263,10 @@ namespace PROYECTO_RESTAURANTE
             if (importeConIGV < 0)
                 throw new Exception("Los descuentos superan el subtotal.");
 
-            igvIncluido = Math.Round(importeConIGV * 18m / 118m,
-                2, MidpointRounding.AwayFromZero);
+            // Precios con IGV incluido. Tasa académica centralizada (Impuestos);
+            // un recibo histórico conserva la tasa vigente cuando se cobró.
+            tasaIgv = Impuestos.TasaPara(fechaCobro);
+            igvIncluido = Impuestos.IgvIncluido(importeConIGV, tasaIgv);
             total = importeConIGV + propina;
         }
 
@@ -1315,6 +1319,15 @@ namespace PROYECTO_RESTAURANTE
                 }
             }
             formaPagoGuardada = metodos.Count == 0 ? "-" : string.Join(" + ", metodos);
+
+            // Fecha del cobro: decide la tasa de IGV del recibo histórico.
+            using (SqlCommand cmd = new SqlCommand(
+                "SELECT MAX(fecha_hora) FROM dbo.PAGO WHERE id_pedido = @Pedido;", conexion))
+            {
+                cmd.Parameters.Add("@Pedido", SqlDbType.Int).Value = idPedido;
+                object f = cmd.ExecuteScalar();
+                fechaCobro = f == null || f == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(f);
+            }
 
             numeroBoletaDemo = numeroRecibo ?? ("PEDIDO-" + idPedido.ToString("D6"));
 
@@ -1542,6 +1555,7 @@ namespace PROYECTO_RESTAURANTE
 
             lblIGVBoleta.Text =
                 FormatoSoles(igvIncluido);
+            guna2HtmlLabel84.Text = Impuestos.Etiqueta(tasaIgv);
 
             lblTotalBoleta.Text =
                 FormatoSoles(total);
@@ -1809,7 +1823,7 @@ namespace PROYECTO_RESTAURANTE
 
             // Títulos correctos.
             guna2HtmlLabel51.Text = "Base imponible:";
-            guna2HtmlLabel36.Text = "IGV (18%):";              // igual que la impresión
+            guna2HtmlLabel36.Text = Impuestos.Etiqueta(tasaIgv) + ":";     // igual que la impresión
 
             // Mostrar los importes (mismo orden que la impresión).
             lblPrevSubtotal.Text = FormatoSoles(subtotal);
@@ -2315,10 +2329,17 @@ namespace PROYECTO_RESTAURANTE
             Graphics g = e.Graphics;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
-            // Columna de impresión centrada en el papel (72 mm útiles en 80 mm).
+            // Columna de impresión dentro del ÁREA IMPRIMIBLE real de la impresora
+            // (no del ancho del papel: en 80 mm la impresora térmica imprime unos
+            // 72 mm o menos, y lo que quedaba fuera se cortaba a la derecha).
+            // El origen del dibujo ya es el borde izquierdo del área imprimible.
             float papel = e.PageBounds.Width;
-            float ancho = Math.Min(272f, papel - 32f);
-            float x = (papel - ancho) / 2f - e.PageSettings.HardMarginX;
+            float imprimible = e.PageSettings.PrintableArea.Width;
+            if (imprimible <= 50f || imprimible > papel)
+                imprimible = papel - 2f * e.PageSettings.HardMarginX;
+            const float seguridad = 6f;                       // margen a cada lado
+            float ancho = Math.Min(272f, imprimible - 2f * seguridad);
+            float x = (imprimible - ancho) / 2f;
             float y = Math.Max(10f, e.MarginBounds.Top - e.PageSettings.HardMarginY);
 
             using (Font empresa = new Font("Arial", 11, FontStyle.Bold))
@@ -2406,7 +2427,15 @@ namespace PROYECTO_RESTAURANTE
                 linea(5);
 
                 // ---------- 4. Detalle: Cant. | Descripción | P. Unit. | Importe ----------
-                float colCant = g.MeasureString("Cant.", negrita).Width + 6f, colPrecio = 52f, colImporte = 58f;
+                // Columnas de números con el ancho de su texto más largo (encabezado
+                // incluido): «Importe» y los importes nunca se recortan.
+                float colCant = g.MeasureString("Cant.", negrita).Width + 6f;
+                float colPrecio = g.MeasureString("P. Unit.", negrita).Width + 4f, colImporte = g.MeasureString("Importe", negrita).Width + 4f;
+                foreach (LineaBoleta l in productos)
+                {
+                    colPrecio = Math.Max(colPrecio, g.MeasureString(Monto(l.PrecioUnitario), texto).Width + 4f);
+                    colImporte = Math.Max(colImporte, g.MeasureString(Monto(l.Importe), texto).Width + 4f);
+                }
                 float colDesc = ancho - colCant - colPrecio - colImporte - 6f;
                 g.DrawString("Cant.", negrita, Brushes.Black, new RectangleF(x, y, colCant, 16), centro);
                 g.DrawString("Descripción", negrita, Brushes.Black, x + colCant, y);
@@ -2431,7 +2460,7 @@ namespace PROYECTO_RESTAURANTE
                 fila("Subtotal (con IGV):", FormatoSoles(subtotal), texto);
                 fila(TextoDescuento(), FormatoSoles(descuentoTotal), texto);
                 fila("Base imponible:", FormatoSoles(baseSinIGV), texto);
-                fila("IGV (18%):", FormatoSoles(igvIncluido), texto);
+                fila(Impuestos.Etiqueta(tasaIgv) + ":", FormatoSoles(igvIncluido), texto);
                 linea(5);
                 fila("TOTAL", FormatoSoles(total), totalFont);
                 linea(5);

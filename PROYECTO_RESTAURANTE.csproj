@@ -188,6 +188,7 @@
     <Compile Include="SelectorClientes.cs" />
     <Compile Include="TarjetasInventario.cs" />
     <Compile Include="Imagenes.cs" />
+    <Compile Include="Impuestos.cs" />
     <Compile Include="MenuDatos.cs" />
     <Compile Include="TarjetasMenu.cs" />
     <Compile Include="CuentaDatos.cs" />

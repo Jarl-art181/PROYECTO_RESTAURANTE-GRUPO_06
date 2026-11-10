@@ -43,6 +43,11 @@ namespace PROYECTO_RESTAURANTE
                 return true;
             }
 
+            // Factura: un RUC nuevo NO se registra como cliente (una razón social
+            // no se separa en nombre y apellidos); solo se vincula si ya existe.
+            if (esFactura)
+                return true;
+
             ClienteInfo c = new ClienteInfo { Documento = documento, Telefono = ClienteDatos.SoloDigitos(txtCelularCliente.Text) };
             string nombre, apellidos;
             ClienteDatos.SepararNombre(txtNombreCliente.Text, out nombre, out apellidos);

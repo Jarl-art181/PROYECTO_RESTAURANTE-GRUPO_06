@@ -233,7 +233,8 @@ namespace PROYECTO_RESTAURANTE
 
             txtDNICliente.KeyPress += (s, e) =>
             {
-                if (!char.IsControl(e.KeyChar) && !char.IsLetterOrDigit(e.KeyChar))
+                // DNI (recibo) y RUC (factura): solo dígitos.
+                if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
                     e.Handled = true;
             };
             txtDNICliente.TextChanged += (s, e) => { if (!cargandoCliente) BuscarClientePorDocumento(); };
@@ -246,6 +247,7 @@ namespace PROYECTO_RESTAURANTE
             };
             chkIncluirCliente.CheckedChanged += (s, e) => MostrarClienteEnVistaPrevia();
             btnBuscarCliente.Click += (s, e) => SeleccionarClienteRegistrado();
+            CrearSelectorDocumento();          // Recibo | Factura (Generar_Boleta.Factura.cs)
         }
 
         // Recupera los datos ya conocidos del pedido (cliente registrado o
@@ -255,6 +257,13 @@ namespace PROYECTO_RESTAURANTE
         private void PrecargarComprador()
         {
             string origen = idReservaPedido.HasValue ? "reserva N.º " + idReservaPedido.Value : "pedido";
+
+            // Cliente del pedido con RUC: sus datos se ofrecen en «Factura».
+            if (idClientePedido.HasValue && ClienteDatos.TipoDocumento(documentoClientePedido) == "RUC")
+            {
+                PrecargarEnFactura();
+                return;
+            }
 
             if (idClientePedido.HasValue)
             {
@@ -284,8 +293,8 @@ namespace PROYECTO_RESTAURANTE
             // El título no cambia (la casilla está en la misma fila); el origen
             // de los datos se indica en la ayuda de la casilla y del nombre.
             string ayuda = "Datos recuperados de" + (idReservaPedido.HasValue ? " la " : "l ") + origen +
-                ". Marque «Incluir en el recibo» si el comprador acepta figurar en él. " +
-                "Puede corregirlos, completar el documento o buscar otro comprador.";
+                ". Verifique o complete el DNI y los nombres del comprador, " +
+                "corríjalos o busque otro comprador.";
             consejosBoleta.SetToolTip(chkIncluirCliente, ayuda);
             consejosBoleta.SetToolTip(txtNombreCliente, ayuda);
             MostrarClienteEnVistaPrevia();
@@ -293,8 +302,11 @@ namespace PROYECTO_RESTAURANTE
 
         private bool IncluirCliente()
         {
-            return chkIncluirCliente != null && chkIncluirCliente.Checked &&
-                   txtNombreCliente.Text.Trim().Length > 0;
+            if (chkIncluirCliente == null || txtNombreCliente.Text.Trim().Length == 0)
+                return false;
+            // Recibo y factura nuevos identifican siempre al comprador; en la
+            // reimpresión se respeta lo guardado (recibos antiguos sin cliente).
+            return !ModoReimpresion || chkIncluirCliente.Checked;
         }
 
         // "DNI", "CE", "RUC" o "Doc." según el número (misma regla que Clientes).
@@ -319,30 +331,20 @@ namespace PROYECTO_RESTAURANTE
                 idClienteSeleccionado = null;      // cambió el documento: ya no es ese cliente
                 documentoClienteRegistrado = null;
                 consejosBoleta.SetToolTip(txtNombreCliente, "");
+                SoltarClienteAnterior();           // sin datos de otra persona
             }
 
-            if (doc.Length >= 8 && !idClienteSeleccionado.HasValue)
+            // Solo un documento completo y EXACTO (DNI 8 / RUC 11 dígitos).
+            int largo = esFactura ? 11 : 8;
+            if (doc.Length == largo && doc.All(char.IsDigit) && !idClienteSeleccionado.HasValue)
             {
-                try
+                ClienteExacto c = BuscarClienteExacto(doc);
+                if (c != null)
                 {
-                    using (SqlConnection cx = new SqlConnection(cadenaConexion))
-                    using (SqlCommand cmd = new SqlCommand(@"
-                        SELECT TOP (1) id_cliente, nombre + ' ' + apellidos, ISNULL([teléfono], '')
-                        FROM dbo.CLIENTE WHERE documento = @Doc AND estado = 'activo';", cx))
-                    {
-                        cmd.CommandTimeout = 10;
-                        cmd.Parameters.Add("@Doc", SqlDbType.VarChar, 20).Value = doc;
-                        cx.Open();
-                        using (SqlDataReader r = cmd.ExecuteReader())
-                        {
-                            if (r.Read())
-                                AsignarCliente(r.GetInt32(0), doc, r.GetString(1), r.GetString(2));
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Registro.Error("Boleta", ex);
+                    if (esFactura)
+                        AsignarClienteFactura(c.Id, doc, c.Nombre, c.Direccion);
+                    else
+                        AsignarCliente(c.Id, doc, c.Nombre, c.Telefono);
                 }
             }
             MostrarClienteEnVistaPrevia();
@@ -359,6 +361,8 @@ namespace PROYECTO_RESTAURANTE
                 txtNombreCliente.Text = nombre;
                 if (!string.IsNullOrEmpty(telefono)) txtCelularCliente.Text = telefono;
                 chkIncluirCliente.Checked = incluir;
+                autoNombre = txtNombreCliente.Text;
+                autoExtra = txtCelularCliente.Text;
                 consejosBoleta.SetToolTip(txtNombreCliente, "Cliente registrado (C" + idCliente.ToString("D4") + "): el pedido quedará asociado a su historial.");
             }
             finally
@@ -374,7 +378,8 @@ namespace PROYECTO_RESTAURANTE
             List<ClienteInfo> clientes;
             try
             {
-                clientes = ClienteDatos.Listar().Where(c => c.Activo).ToList();
+                string tipo = esFactura ? "RUC" : "DNI";
+                clientes = ClienteDatos.Listar().Where(c => c.Activo && ClienteDatos.TipoDocumento(c.Documento) == tipo).ToList();
             }
             catch (Exception ex)
             {
@@ -384,8 +389,20 @@ namespace PROYECTO_RESTAURANTE
                 return;
             }
 
+            if (clientes.Count == 0)
+            {
+                MessageBox.Show(this, esFactura
+                        ? "No hay clientes registrados con RUC.\nEscriba el RUC, la razón social y la dirección fiscal."
+                        : "No hay clientes registrados con DNI.\nEscriba el DNI y los nombres y apellidos.",
+                    "Buscar cliente", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
             ClienteInfo elegido = SelectorClientes.Elegir(this, clientes, "Buscar cliente registrado", null, "Cancelar");
-            if (elegido != null)
+            if (elegido == null)
+                return;
+            if (esFactura)
+                AsignarClienteFactura(elegido.IdCliente, elegido.Documento.Trim(), elegido.NombreCompleto, elegido.Direccion);
+            else
                 AsignarCliente(elegido.IdCliente, elegido.Documento, elegido.NombreCompleto, elegido.Telefono);
         }
 
@@ -420,13 +437,16 @@ namespace PROYECTO_RESTAURANTE
             if (mostrar)
             {
                 lblPrevCliente.MaximumSize = new Size(ancho, 0);
-                lblPrevCliente.Text = "Cliente: " + txtNombreCliente.Text.Trim();
+                string direccionPrev = txtCelularCliente.Text.Trim();
+                lblPrevCliente.Text = esFactura
+                    ? "Razón social: " + txtNombreCliente.Text.Trim() + (direccionPrev.Length > 0 ? "\nDirección: " + direccionPrev : "")
+                    : "Cliente: " + txtNombreCliente.Text.Trim();
                 lblPrevCliente.Location = new Point(izquierda, baseY);
                 alto = lblPrevCliente.PreferredSize.Height + 2;
                 lblPrevDocumento.Visible = doc.Length > 0;
                 if (doc.Length > 0)
                 {
-                    lblPrevDocumento.Text = EtiquetaDocumento(doc) + ": " + doc;
+                    lblPrevDocumento.Text = (esFactura ? "RUC" : EtiquetaDocumento(doc)) + ": " + doc;
                     lblPrevDocumento.Location = new Point(izquierda, baseY + alto);
                     alto += lblPrevDocumento.PreferredSize.Height + 2;
                 }
@@ -790,22 +810,17 @@ namespace PROYECTO_RESTAURANTE
 
             int idCajero = SesionActual.IdEmpleado.Value;
 
-            // Comprador (opcional): distinto de quien cobra.
-            string nombreCliente = "";
-            string documentoCliente = "";
+            // Comprador (obligatorio): recibo = DNI + nombres; factura = RUC +
+            // razón social (+ dirección fiscal). Se valida antes de abrir SQL.
+            string nombreCliente, documentoCliente, direccionCliente;
+            string faltante = ValidarDatosDocumento(out documentoCliente, out nombreCliente, out direccionCliente);
+            if (faltante != null)
+                throw new Exception(faltante);
             int? clienteVinculado = null;
-            if (IncluirCliente())
-            {
-                nombreCliente = txtNombreCliente.Text.Trim();
-                while (nombreCliente.Contains("  ")) nombreCliente = nombreCliente.Replace("  ", " ");
-                documentoCliente = txtDNICliente.Text.Trim().ToUpperInvariant();
-                if (nombreCliente.Length < 3)
-                    throw new Exception("Escriba el nombre completo del cliente o desmarque \"Incluir en el recibo\".");
-                if (documentoCliente.Length > 0 && ClienteDatos.TipoDocumento(documentoCliente) == "?")
-                    throw new Exception("El documento del cliente no es válido: DNI de 8 dígitos, CE de 9, RUC de 11 o pasaporte.");
-                if (idClienteSeleccionado.HasValue && documentoCliente == documentoClienteRegistrado)
-                    clienteVinculado = idClienteSeleccionado;
-            }
+            if (idClienteSeleccionado.HasValue && documentoCliente == documentoClienteRegistrado)
+                clienteVinculado = idClienteSeleccionado;
+            bool factura = esFactura;
+            string serie = factura ? SerieFactura : SerieRecibo;
 
             decimal suma = 0;
 
@@ -967,27 +982,31 @@ namespace PROYECTO_RESTAURANTE
                             }
                         }
 
-                        // 4c. Recibo interno: serie R001 y correlativo único.
+                        // 4c. Recibo interno (R001, tipo B) o factura académica
+                        //     (FA01, tipo F): correlativo único por serie.
                         string numero;
                         using (SqlCommand cmd = new SqlCommand(@"
                     SELECT ISNULL(MAX(CAST(numero AS INT)), 0) + 1
                     FROM dbo.COMPROBANTE WITH (UPDLOCK, HOLDLOCK)
                     WHERE serie = @Serie;", conexion, transaccion))
                         {
-                            cmd.Parameters.Add("@Serie", SqlDbType.VarChar, 4).Value = SerieRecibo;
+                            cmd.Parameters.Add("@Serie", SqlDbType.VarChar, 4).Value = serie;
                             int siguiente = Convert.ToInt32(cmd.ExecuteScalar());
                             if (siguiente > 99999999)
-                                throw new Exception("Se agotó la numeración de recibos.");
+                                throw new Exception("Se agotó la numeración de la serie " + serie + ".");
                             numero = siguiente.ToString("D8");
                         }
                         using (SqlCommand cmd = new SqlCommand(@"
                     INSERT INTO dbo.COMPROBANTE
-                        (tipo, serie, numero, fecha_emision, identificacion_cliente, nombre_cliente, estado, id_pedido)
+                        (tipo, serie, numero, fecha_emision, identificacion_cliente, nombre_cliente, direccion_cliente, estado, id_pedido)
                     VALUES
-                        ('B', @Serie, @Numero, CONVERT(DATE, SYSDATETIME()), @Documento, @Nombre, 'emitido', @Pedido);",
+                        (@Tipo, @Serie, @Numero, CONVERT(DATE, SYSDATETIME()), @Documento, @Nombre, @Direccion, 'emitido', @Pedido);",
                             conexion, transaccion))
                         {
-                            cmd.Parameters.Add("@Serie", SqlDbType.VarChar, 4).Value = SerieRecibo;
+                            cmd.Parameters.Add("@Tipo", SqlDbType.Char, 1).Value = factura ? "F" : "B";
+                            cmd.Parameters.Add("@Serie", SqlDbType.VarChar, 4).Value = serie;
+                            cmd.Parameters.Add("@Direccion", SqlDbType.VarChar, 255).Value =
+                                direccionCliente.Length == 0 ? (object)DBNull.Value : direccionCliente;
                             cmd.Parameters.Add("@Numero", SqlDbType.VarChar, 8).Value = numero;
                             cmd.Parameters.Add("@Documento", SqlDbType.VarChar, 20).Value =
                                 documentoCliente.Length == 0 ? (object)DBNull.Value : documentoCliente;
@@ -1020,7 +1039,7 @@ namespace PROYECTO_RESTAURANTE
                                     "No se pudo cerrar el pedido.");
                             }
 
-                            numeroRecibo = SerieRecibo + "-" + numero;
+                            numeroRecibo = serie + "-" + numero;
                         }
 
                         // 6. Salón: la mesa queda libre en la MISMA transacción
@@ -1051,6 +1070,7 @@ namespace PROYECTO_RESTAURANTE
                         }
 
                         transaccion.Commit();
+                        fechaEmision = DateTime.Today;
                         if (compradorPorRegistrar != null && clienteVinculado.HasValue)
                         {
                             clienteRegistradoAlCobrar = clienteVinculado;
@@ -1284,9 +1304,11 @@ namespace PROYECTO_RESTAURANTE
         private void CargarDatosGuardados(SqlConnection conexion)
         {
             numeroRecibo = null;
-            string nombre = null, documento = null;
+            string nombre = null, documento = null, direccion = null;
+            bool facturaGuardada = false;
             using (SqlCommand cmd = new SqlCommand(@"
-                SELECT TOP (1) serie, numero, nombre_cliente, identificacion_cliente
+                SELECT TOP (1) serie, numero, nombre_cliente, identificacion_cliente,
+                       tipo, direccion_cliente, fecha_emision
                 FROM dbo.COMPROBANTE WHERE id_pedido = @Pedido;", conexion))
             {
                 cmd.Parameters.Add("@Pedido", SqlDbType.Int).Value = idPedido;
@@ -1297,6 +1319,9 @@ namespace PROYECTO_RESTAURANTE
                         numeroRecibo = r.GetString(0).Trim() + "-" + r.GetString(1).Trim();
                         nombre = r.IsDBNull(2) ? null : r.GetString(2);
                         documento = r.IsDBNull(3) ? null : r.GetString(3);
+                        facturaGuardada = r.GetString(4) == "F";
+                        direccion = r.IsDBNull(5) ? null : r.GetString(5);
+                        fechaEmision = r.GetDateTime(6);
                     }
                 }
             }
@@ -1334,8 +1359,12 @@ namespace PROYECTO_RESTAURANTE
             cargandoCliente = true;
             try
             {
+                // Documento original tal como se emitió (sin recalcular ni completar).
+                esFactura = facturaGuardada;
+                ConfigurarCamposDocumento();
                 txtNombreCliente.Text = nombre ?? "";
                 txtDNICliente.Text = documento ?? "";
+                txtCelularCliente.Text = facturaGuardada ? (direccion ?? "") : "";
                 chkIncluirCliente.Checked = !string.IsNullOrEmpty(nombre);
             }
             finally
@@ -1352,13 +1381,15 @@ namespace PROYECTO_RESTAURANTE
             txtCelularCliente.ReadOnly = true;
             chkIncluirCliente.Enabled = false;
             btnBuscarCliente.Enabled = false;
+            btnDocRecibo.Enabled = false;          // el tipo de documento ya no cambia
+            btnDocFactura.Enabled = false;
         }
 
         // Ventana en modo reimpresión: sin cobrar de nuevo.
         private void PrepararReimpresion()
         {
-            Text = "Reimprimir recibo";
-            guna2HtmlLabel1.Text = "REIMPRIMIR RECIBO DE VENTA";
+            Text = esFactura ? "Reimprimir factura" : "Reimprimir recibo";
+            guna2HtmlLabel1.Text = esFactura ? "REIMPRIMIR FACTURA" : "REIMPRIMIR RECIBO DE VENTA";
             BloquearDatosCliente();
             btnRegistrarCobro.Enabled = false;
             guna2HtmlLabel22.Enabled = false;
@@ -1408,7 +1439,7 @@ namespace PROYECTO_RESTAURANTE
             int? elegido = null;
             using (Form f = new Form())
             {
-                f.Text = "Reimprimir recibo";
+                f.Text = "Reimprimir comprobante";
                 f.ClientSize = new Size(720, 480);
                 f.FormBorderStyle = FormBorderStyle.FixedToolWindow;
                 f.StartPosition = FormStartPosition.CenterParent;
@@ -1418,7 +1449,7 @@ namespace PROYECTO_RESTAURANTE
                 Guna2Panel cab = new Guna2Panel { Dock = DockStyle.Top, Height = 48, FillColor = Color.Gold };
                 cab.Controls.Add(new Label
                 {
-                    Text = "REIMPRIMIR RECIBO", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter,
+                    Text = "REIMPRIMIR RECIBO O FACTURA", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter,
                     Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold), BackColor = Color.Transparent
                 });
                 Guna2TextBox buscar = new Guna2TextBox
@@ -1432,7 +1463,7 @@ namespace PROYECTO_RESTAURANTE
                     RowHeadersVisible = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect
                 };
                 foreach (string[] c in new[] { new[] { "pedido", "PEDIDO" }, new[] { "fecha", "FECHA" }, new[] { "canal", "TIPO" },
-                         new[] { "total", "TOTAL S/" }, new[] { "recibo", "RECIBO" }, new[] { "cliente", "CLIENTE" } })
+                         new[] { "total", "TOTAL S/" }, new[] { "recibo", "COMPROBANTE" }, new[] { "cliente", "CLIENTE" } })
                     tabla.Columns.Add(c[0], c[1]);
                 Guna2Button abrir = new Guna2Button { Text = "Abrir recibo", BorderRadius = 10, FillColor = Color.Gold, ForeColor = Color.Black, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
                 Guna2Button cerrar = new Guna2Button { Text = "Cerrar", BorderRadius = 10, FillColor = Color.Gainsboro, ForeColor = Color.Black, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
@@ -1696,6 +1727,13 @@ namespace PROYECTO_RESTAURANTE
                 // Actualizar los datos del formulario.
                 ActualizarVistaPrevia();
 
+                // Factura: vista A4 con Imprimir y Guardar PDF.
+                if (esFactura)
+                {
+                    MostrarFacturaA4();
+                    return;
+                }
+
                 // Preparar el documento para impresión.
                 using (PrintDocument documento =
                     CrearDocumentoImpresion())
@@ -1840,12 +1878,13 @@ namespace PROYECTO_RESTAURANTE
             // 4. TÍTULOS DE LA BOLETA DEMOSTRATIVA
             // ======================================
 
+            string tituloDoc = esFactura ? "FACTURA" : "RECIBO DE VENTA";
             guna2HtmlLabel20.Text =
-                ModoReimpresion ? "RECIBO DE VENTA (REIMPRESIÓN)" : "RECIBO DE VENTA";
-            consejosBoleta.SetToolTip(guna2HtmlLabel20, NotaInterna);
+                ModoReimpresion ? tituloDoc + " (REIMPRESIÓN)" : tituloDoc;
+            consejosBoleta.SetToolTip(guna2HtmlLabel20, esFactura ? NotaFactura : NotaInterna);
 
             guna2HtmlLabel56.Text = "¡Gracias por su compra!";
-            lblPrevNota.Text = NotaInterna;
+            lblPrevNota.Text = esFactura ? NotaFactura : NotaInterna;
             lblPrevCaja.Text = "Caja: " + (cajeroRecibo ?? SesionActual.NombreCompleto ?? "");
 
             // ======================================
@@ -2237,7 +2276,7 @@ namespace PROYECTO_RESTAURANTE
                 }
 
                 MessageBox.Show(
-                    "Recibo enviado a la impresora.\n" +
+                    (esFactura ? "Factura" : "Recibo") + " enviado a la impresora.\n" +
                     "No se ha registrado un segundo cobro.",
                     "Impresión",
                     MessageBoxButtons.OK,
@@ -2255,6 +2294,10 @@ namespace PROYECTO_RESTAURANTE
 
         private PrintDocument CrearDocumentoImpresion()
         {
+            // Factura: formato A4 independiente (Generar_Boleta.Factura.cs).
+            if (esFactura)
+                return CrearDocumentoFactura();
+
             // Verificar la impresora seleccionada.
             if (cmbImpresoraBoleta.SelectedItem == null)
             {
@@ -3319,6 +3362,16 @@ namespace PROYECTO_RESTAURANTE
                             metodo, total));
                 }
 
+                // Datos obligatorios del documento elegido (antes de todo).
+                string docV, nomV, dirV;
+                string faltante = ValidarDatosDocumento(out docV, out nomV, out dirV);
+                if (faltante != null)
+                {
+                    MessageBox.Show(faltante, esFactura ? "Datos de la factura" : "Datos del recibo",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 // Comprador con documento y aún no registrado: se pide su
                 // autorización para guardarlo en Gestión de Clientes.
                 if (!AutorizarRegistroComprador())
@@ -3340,7 +3393,9 @@ namespace PROYECTO_RESTAURANTE
                 DialogResult respuesta = MessageBox.Show(
                     "Pedido N.º " + idPedido +
                     "\nTotal: S/ " + total.ToString("N2") +
-                    (IncluirCliente() ? "\nCliente: " + txtNombreCliente.Text.Trim() : "") +
+                    (esFactura
+                        ? "\nDocumento: FACTURA (académica)\nRUC: " + docV + "\nRazón social: " + nomV
+                        : "\nDocumento: RECIBO DE VENTA\nDNI: " + docV + "\nCliente: " + nomV) +
                     "\n\n¿Desea confirmar el cobro?",
                     "Confirmar cobro",
                     MessageBoxButtons.YesNo,
@@ -3382,13 +3437,14 @@ namespace PROYECTO_RESTAURANTE
 
                 MessageBox.Show(
                     "Cobro registrado correctamente.\n\n" +
-                    "Recibo " + numeroRecibo + "\n" +
+                    (esFactura ? "Factura " : "Recibo ") + numeroRecibo + "\n" +
                     "Pedido N.º " + idPedido +
                     "\nTotal: S/ " + total.ToString("N2") +
                     (clienteRegistradoAlCobrar.HasValue
                         ? "\n\nCliente vinculado en Gestión de Clientes: " + txtNombreCliente.Text.Trim()
                         : "") +
-                    "\n\nYa puede imprimir el recibo.",
+                    (esFactura ? "\n\nYa puede ver, imprimir o guardar en PDF la factura (Vista previa)."
+                               : "\n\nYa puede imprimir el recibo."),
                     "Cobro exitoso",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);

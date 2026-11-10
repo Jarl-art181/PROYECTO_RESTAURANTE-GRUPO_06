@@ -19,7 +19,8 @@ namespace PROYECTO_RESTAURANTE
     // ----------------------------------------------------------
     // Los mismos tres cuadros del panel «Datos del cliente» sirven
     // a los dos documentos (no se mueve el diseño):
-    //   Recibo : DNI (8 dígitos) · nombres y apellidos · celular
+    //   Recibo : DNI (8 dígitos) · nombres y apellidos · celular — OPCIONALES:
+    //            se puede cobrar sin datos; si se escriben, se validan.
     //   Factura: RUC (11 dígitos) · razón social · dirección fiscal
     // Cada documento conserva sus propios datos: cambiar de uno a otro
     // no mezcla un DNI con un RUC y, al volver, se recuperan.
@@ -72,7 +73,7 @@ namespace PROYECTO_RESTAURANTE
             btnDocFactura.Click += (s, e) => CambiarDocumento(true);
             // En la factura, el tercer cuadro es la dirección fiscal: se ve en la vista previa.
             txtCelularCliente.TextChanged += (s, e) => { if (esFactura && !cargandoCliente) MostrarClienteEnVistaPrevia(); };
-            consejosBoleta.SetToolTip(btnDocRecibo, "Recibo de venta: DNI (8 dígitos) y nombres y apellidos completos.");
+            consejosBoleta.SetToolTip(btnDocRecibo, "Recibo de venta: DNI y nombres opcionales (el cliente puede comprar sin dar sus datos).");
             consejosBoleta.SetToolTip(btnDocFactura, "Factura académica: RUC (11 dígitos), razón social y dirección fiscal.");
             ConfigurarCamposDocumento();
         }
@@ -110,9 +111,9 @@ namespace PROYECTO_RESTAURANTE
             }
             else
             {
-                txtDNICliente.PlaceholderText = "DNI (8 dígitos)";
+                txtDNICliente.PlaceholderText = "DNI (opcional)";
                 txtDNICliente.MaxLength = 8;
-                txtNombreCliente.PlaceholderText = "Nombres y apellidos completos";
+                txtNombreCliente.PlaceholderText = "Nombres y apellidos (opcional)";
                 txtNombreCliente.MaxLength = 120;
                 txtCelularCliente.PlaceholderText = "Celular (opcional)";
                 txtCelularCliente.MaxLength = 20;
@@ -286,17 +287,28 @@ namespace PROYECTO_RESTAURANTE
                 return null;
             }
 
-            if (documento.Length == 0)
-                return "Ingrese el DNI del cliente (8 dígitos).\n\nSi el cliente necesita factura, elija «Factura» y use su RUC.";
-            if (documento.Length != 8 || !documento.All(c => c >= '0' && c <= '9'))
-                return "El DNI debe tener exactamente 8 dígitos numéricos.";
-            if (nombre.Length == 0)
-                return "Ingrese los nombres y apellidos completos del cliente.";
-            string[] partes = nombre.Split(' ');
-            // Al menos un nombre y un apellido de 2+ letras (se admiten iniciales: «María F. Torres»).
-            if (partes.Count(p => p.Trim('.', '-', '\'').Length >= 2) < 2 ||
-                !nombre.All(c => char.IsLetter(c) || c == ' ' || c == '\'' || c == '-' || c == '.'))
-                return "Escriba los nombres y apellidos completos del cliente (al menos un nombre y un apellido, solo letras).";
+            // RECIBO: DNI y nombres OPCIONALES. Sin datos, el recibo se emite sin
+            // comprador (NULL en SQL, sin inventar datos ni crear clientes).
+            if (documento.Length == 0 && nombre.Length == 0)
+                return null;
+            if (documento.Length > 0)
+            {
+                if (documento.Length != 8 || !documento.All(c => c >= '0' && c <= '9'))
+                    return "El DNI debe tener exactamente 8 dígitos numéricos.\n\nEl DNI es opcional: puede dejarlo vacío.";
+                if (nombre.Length == 0)
+                    return "Escriba los nombres y apellidos del titular del DNI, o deje ambos campos vacíos.";
+            }
+            if (!nombre.All(c => char.IsLetter(c) || c == ' ' || c == '\'' || c == '-' || c == '.'))
+                return "El nombre del cliente solo puede contener letras.\n\nEl nombre es opcional: puede dejarlo vacío.";
+            if (documento.Length > 0)
+            {
+                // Con DNI: nombre y apellido de 2+ letras (se admiten iniciales: «María F. Torres»).
+                string[] partes = nombre.Split(' ');
+                if (partes.Count(p => p.Trim('.', '-', '\'').Length >= 2) < 2)
+                    return "Escriba los nombres y apellidos completos del titular del DNI (al menos un nombre y un apellido).";
+            }
+            else if (nombre.Trim('.', '-', '\'').Length < 3)
+                return "Escriba el nombre del cliente (al menos 3 letras) o deje el campo vacío.";
             if (nombre.Length > 120)
                 return "El nombre del cliente admite hasta 120 caracteres.";
             return null;

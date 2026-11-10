@@ -34,7 +34,9 @@ namespace PROYECTO_RESTAURANTE
         // SUNAT exige DNI/CE y nombre en boletas electrónicas > S/ 700
         // (R.S. 303-2018). Aquí solo se avisa: el recibo es interno.
         private const decimal MontoIdentificacionSunat = 700m;
-        private const string NotaInterna = "Recibo interno · No es comprobante electrónico SUNAT";
+        // El pie del recibo ya no lleva la leyenda «Recibo interno · No es
+        // comprobante electrónico SUNAT» (pedido del propietario); el recibo
+        // sigue siendo interno (serie R001). La factura conserva NotaFactura.
 
         // Número del pedido (formato PEDIDO-000019): va bajo el código de barras.
         // El número interno del recibo (R001-...) se muestra aparte, bajo el título.
@@ -1886,10 +1888,15 @@ namespace PROYECTO_RESTAURANTE
             string tituloDoc = esFactura ? "FACTURA" : "RECIBO DE VENTA";
             guna2HtmlLabel20.Text =
                 ModoReimpresion ? tituloDoc + " (REIMPRESIÓN)" : tituloDoc;
-            consejosBoleta.SetToolTip(guna2HtmlLabel20, esFactura ? NotaFactura : NotaInterna);
+            consejosBoleta.SetToolTip(guna2HtmlLabel20, esFactura ? NotaFactura : null);
 
             guna2HtmlLabel56.Text = "¡Gracias por su compra!";
-            lblPrevNota.Text = esFactura ? NotaFactura : NotaInterna;
+            // Pie: el recibo termina en «¡Sabor que te encanta!»; la factura
+            // muestra su leyenda académica. El pie se ajusta a su contenido.
+            lblPrevNota.Text = esFactura ? NotaFactura : "";
+            lblPrevNota.Visible = esFactura;
+            Control ultimoPie = esFactura ? (Control)lblPrevNota : guna2HtmlLabel46;
+            guna2Panel11.Height = ultimoPie.Bottom + DisenoVentanas.Medida(this, 14);
             lblPrevCaja.Text = "Caja: " + (cajeroRecibo ?? SesionActual.NombreCompleto ?? "");
 
             // ======================================
@@ -2340,7 +2347,7 @@ namespace PROYECTO_RESTAURANTE
             // Alto según el contenido (sin desperdiciar papel): base del recibo,
             // cada producto con holgura para nombres en dos líneas, y los datos
             // opcionales (cliente, mesa, reimpresión).
-            int alto = 760 + cantidadProductos * 36
+            int alto = 742 + cantidadProductos * 36
                      + (IncluirCliente() ? 60 : 0)
                      + (ModoReimpresion ? 20 : 0)
                      + 20;
@@ -2395,7 +2402,6 @@ namespace PROYECTO_RESTAURANTE
             using (Font negrita = new Font("Arial", 8.5f, FontStyle.Bold))
             using (Font texto = new Font("Arial", 8.5f, FontStyle.Regular))
             using (Font pequeño = new Font("Arial", 7.5f, FontStyle.Regular))
-            using (Font nota = new Font("Arial", 6.5f, FontStyle.Regular))
             using (Font totalFont = new Font("Arial", 12, FontStyle.Bold))
             using (StringFormat centro = new StringFormat { Alignment = StringAlignment.Center })
             using (StringFormat derecha = new StringFormat { Alignment = StringAlignment.Far })
@@ -2534,11 +2540,10 @@ namespace PROYECTO_RESTAURANTE
                 }
                 centrado(CodigoPedido, negrita, 10);
 
-                // ---------- 8. Agradecimientos y nota discreta ----------
+                // ---------- 8. Agradecimientos (sin leyenda final) ----------
                 centrado("¡Gracias por su compra!", titulo, 2);
                 centrado("¡Gracias por su preferencia!", texto, 1);
-                centrado("¡Sabor que te encanta!", texto, 8);
-                centrado(NotaInterna, nota, 0);
+                centrado("¡Sabor que te encanta!", texto, 0);
 
                 e.HasMorePages = false;
             }
@@ -3400,7 +3405,9 @@ namespace PROYECTO_RESTAURANTE
                     "\nTotal: S/ " + total.ToString("N2") +
                     (esFactura
                         ? "\nDocumento: FACTURA (académica)\nRUC: " + docV + "\nRazón social: " + nomV
-                        : "\nDocumento: RECIBO DE VENTA\nDNI: " + docV + "\nCliente: " + nomV) +
+                        : "\nDocumento: RECIBO DE VENTA" +
+                          (docV.Length > 0 ? "\nDNI: " + docV : "") +
+                          "\nCliente: " + (nomV.Length > 0 ? nomV : "sin datos (opcional)")) +
                     "\n\n¿Desea confirmar el cobro?",
                     "Confirmar cobro",
                     MessageBoxButtons.YesNo,

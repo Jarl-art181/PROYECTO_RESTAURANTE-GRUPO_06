@@ -39,14 +39,15 @@ namespace PROYECTO_RESTAURANTE
         // ------------------------------------------------------------------
         public const int ApartadoPrevioMinutos = 15;
 
-        // Llegada anticipada: el comensal puede confirmar su llegada desde
-        // 60 minutos antes de la hora reservada (y Pedidos vincula su pedido
-        // a la reserva dentro de esa ventana). No cambia con el apartado.
+        // Llegada anticipada: el personal autorizado confirma la llegada en
+        // cualquier momento del MISMO día de la reserva (ControlReservas-
+        // Automaticas.ConfirmarLlegada) y Pedidos vincula el pedido a esa
+        // reserva de hoy. Este valor ya no limita la llegada; se conserva
+        // porque Pedidos aún envía el parámetro @Apartado (sin uso en SQL).
         public const int LlegadaAnticipadaMinutos = 60;
 
-        // Nombre anterior, que aún usa Pedidos para vincular el pedido a la
-        // reserva con llegada confirmada: es la ventana de llegada anticipada,
-        // NO el apartado de la mesa (ver ApartadoPrevioMinutos).
+        // Nombre anterior del mismo valor (lo usa Pedidos). NO es el apartado
+        // de la mesa (ver ApartadoPrevioMinutos).
         public const int ApartadoMinutos = LlegadaAnticipadaMinutos;
 
         public static DateTime InicioApartado(DateTime fechaHora)
@@ -164,6 +165,23 @@ namespace PROYECTO_RESTAURANTE
         // ------------------------------------------------------------------
         public static string MotivoReservaProxima(SqlConnection conexion, SqlTransaction tx, int idMesa)
         {
+            // Llegada confirmada hoy y sin pedido todavía: es el cliente de la
+            // reserva y su pedido se abre (no se bloquea por otra reserva posterior).
+            string llegada = SqlAhora + @"
+                SELECT COUNT(*) FROM dbo.RESERVA_MESA F
+                WHERE F.id_mesa = @Mesa AND F.estado = 'finalizada'
+                  AND CAST(F.fecha_hora AS DATE) = CAST(@Ahora AS DATE)
+                  AND F.fecha_hora >= DATEADD(MINUTE, -@Duracion, @Ahora)
+                  AND NOT EXISTS (SELECT 1 FROM dbo.PEDIDO P WHERE P.id_reserva = F.id_reserva);";
+            using (SqlCommand cmd = new SqlCommand(llegada, conexion, tx))
+            {
+                AgregarParametros(cmd);
+                cmd.Parameters.Add("@Duracion", SqlDbType.Int).Value = DuracionReservaMinutos;
+                cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
+                if (Convert.ToInt32(cmd.ExecuteScalar()) > 0)
+                    return null;
+            }
+
             string sql = SqlAhora + @"
                 SELECT TOP (1) R.id_reserva, R.fecha_hora, R.nombre_cliente, M.[número]
                 FROM dbo.RESERVA_MESA R" + (tx != null ? " WITH (UPDLOCK, HOLDLOCK)" : "") + @"
@@ -187,10 +205,19 @@ namespace PROYECTO_RESTAURANTE
                            "No se abren pedidos nuevos en una mesa desde " + (DuracionReservaMinutos / 60) +
                            " horas antes de su reserva, para no comprometerla. Elija otra mesa.\n\n" +
                            "Si es el cliente de la reserva, confirme su llegada en Gestión de Mesas " +
-                           "(desde " + LlegadaAnticipadaMinutos + " minutos antes).";
+                           "(«Confirmar llegada», también si llega antes de su hora).";
                 }
             }
         }
+
+        // Estado que recibe una mesa al quedar sin pedido (cobro): 'reservada'
+        // si otra reserva confirmada debe tenerla apartada ahora; si no, 'libre'.
+        // Alias M = MESA; requiere SqlAhora y AgregarParametros.
+        public const string SqlEstadoAlLiberar = @"
+            CASE WHEN EXISTS (SELECT 1 FROM dbo.RESERVA_MESA R
+                              WHERE R.id_mesa = M.id_mesa AND R.estado = 'confirmada'
+                                AND " + SqlDebeEstarApartada + @")
+                 THEN 'reservada' ELSE 'libre' END";
 
         // Texto para el usuario: cuándo se apartará la mesa.
         public static string TextoApartado(DateTime fechaHora)

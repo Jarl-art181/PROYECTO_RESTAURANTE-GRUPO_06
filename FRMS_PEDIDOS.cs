@@ -2020,6 +2020,8 @@ namespace PROYECTO_RESTAURANTE
         DECLARE @Reserva INT = NULL, @Contacto NVARCHAR(100) = NULL,
                 @Telefono VARCHAR(20) = NULL, @Cliente INT = NULL;
 
+        DECLARE @Ahora DATETIME2 = DATEADD(SECOND, @Desfase, SYSDATETIME());
+
         IF @Canal = 'salon' AND @Mesa IS NOT NULL
             SELECT TOP (1)
                    @Reserva = R.id_reserva, @Contacto = R.nombre_cliente,
@@ -2029,8 +2031,9 @@ namespace PROYECTO_RESTAURANTE
             LEFT JOIN dbo.CLIENTE C ON C.id_cliente = R.id_cliente
             WHERE R.id_mesa = @Mesa
               AND R.estado = 'finalizada'
-              AND R.fecha_hora >= DATEADD(MINUTE, -@Duracion, SYSDATETIME())
-              AND R.fecha_hora <= DATEADD(MINUTE, @Apartado, SYSDATETIME())
+              AND R.fecha_hora >= DATEADD(MINUTE, -@Duracion, @Ahora)
+              -- Llegada confirmada (también anticipada) de una reserva de hoy.
+              AND CAST(R.fecha_hora AS DATE) = CAST(@Ahora AS DATE)
               AND NOT EXISTS (SELECT 1 FROM dbo.PEDIDO P WHERE P.id_reserva = R.id_reserva)
             ORDER BY R.fecha_hora DESC, R.id_reserva DESC;
 
@@ -2097,6 +2100,8 @@ namespace PROYECTO_RESTAURANTE
                     ReservaReglas.DuracionReservaMinutos;
                 cmd.Parameters.Add("@Apartado", SqlDbType.Int).Value =
                     ReservaReglas.ApartadoMinutos;
+                cmd.Parameters.Add("@Desfase", SqlDbType.Int).Value =
+                    (int)ReservaReglas.DesfasePruebas.TotalSeconds;
 
                 object resultado = cmd.ExecuteScalar();
 

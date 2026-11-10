@@ -29,7 +29,6 @@ namespace PROYECTO_RESTAURANTE
         private const int IntervaloMaximo = 60000;
         private const int TiempoComando = 15;          // segundos (no se amplía)
         private const int ToleranciaMinutos = ReservaReglas.ToleranciaLlegadaMinutos;
-        private const int LlegadaAnticipadaMinutos = ReservaReglas.LlegadaAnticipadaMinutos;
         private const int AvisoMinutos = 15;
 
         // Cadena centralizada en App.config (ver BaseDatos).
@@ -62,6 +61,9 @@ namespace PROYECTO_RESTAURANTE
             public int NumeroMesa;
             public string Cliente;
             public DateTime FechaHora;
+            public string Telefono;
+            public int Personas;
+            public string Observacion;
         }
 
         // ======================================================
@@ -657,6 +659,9 @@ namespace PROYECTO_RESTAURANTE
         // Puede llamarse desde la pregunta de los 15 min o desde Abrir pedido.
         public static void ConfirmarLlegada(int idReserva)
         {
+            if (!SesionActual.Iniciada || !Permisos.AtiendeReservas(SesionActual.Cargo))
+                throw new Exception("Solo un Administrador, Cajero o Mesero puede confirmar la llegada de una reserva.");
+
             using (SqlConnection conexion = new SqlConnection(CadenaConexion))
             {
                 conexion.Open();
@@ -702,15 +707,37 @@ namespace PROYECTO_RESTAURANTE
 
                         if (estadoReserva != "confirmada")
                             throw new Exception("La reserva ya fue atendida o cancelada.");
-                        if (estadoMesa != "reservada" && estadoMesa != "libre")
-                            throw new Exception("La mesa está " + estadoMesa + ": no se puede confirmar la llegada.");
-                        if (ahoraServidor < fechaHora.AddMinutes(-LlegadaAnticipadaMinutos))
+                        // Llegada anticipada: se confirma el MISMO día de la reserva (no
+                        // antes), por personal que atiende reservas, con la mesa disponible.
+                        if (ahoraServidor.Date < fechaHora.Date)
                             throw new Exception("La reserva es para el " + fechaHora.ToString("dd/MM/yyyy 'a las' HH:mm") +
-                                ": la llegada se confirma desde " + LlegadaAnticipadaMinutos + " minutos antes.");
+                                ": la llegada se confirma ese día.");
                         if (ahoraServidor >= fechaHora.AddMinutes(ToleranciaMinutos))
                             throw new Exception("La reserva superó los " + ToleranciaMinutos + " minutos de tolerancia.");
-                        if (TienePedidoActivo(conexion, tx, idMesa))
-                            throw new Exception("La mesa tiene un pedido activo.");
+                        if (estadoMesa == "ocupada" || TienePedidoActivo(conexion, tx, idMesa))
+                            throw new Exception("La mesa todavía está ocupada por otro cliente: aún no está disponible.\n" +
+                                "La reserva sigue confirmada; confirme la llegada cuando la mesa quede libre.");
+                        if (estadoMesa != "reservada" && estadoMesa != "libre")
+                            throw new Exception("La mesa está " + estadoMesa + ": no se puede confirmar la llegada.");
+                        // Si otra reserva de la mesa es anterior y sigue vigente, la mesa es suya.
+                        using (SqlCommand cmd = Comando(@"
+                            SELECT TOP (1) id_reserva, fecha_hora FROM dbo.RESERVA_MESA WITH (UPDLOCK, HOLDLOCK)
+                            WHERE id_mesa = @Mesa AND id_reserva <> @Reserva AND estado = 'confirmada'
+                              AND fecha_hora < @Fecha AND DATEADD(MINUTE, @Tolerancia, fecha_hora) > @Ahora
+                            ORDER BY fecha_hora;", conexion, tx))
+                        {
+                            cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
+                            cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
+                            cmd.Parameters.Add("@Fecha", SqlDbType.DateTime2).Value = fechaHora;
+                            cmd.Parameters.Add("@Ahora", SqlDbType.DateTime2).Value = ahoraServidor;
+                            cmd.Parameters.Add("@Tolerancia", SqlDbType.Int).Value = ToleranciaMinutos;
+                            using (SqlDataReader rd = cmd.ExecuteReader())
+                            {
+                                if (rd.Read())
+                                    throw new Exception("La mesa está comprometida antes con la reserva N.º " + rd[0] + " de las " +
+                                        Convert.ToDateTime(rd[1]).ToString("HH:mm") + ": aún no está disponible.");
+                            }
+                        }
 
                         using (SqlCommand cmd = Comando(@"
                             UPDATE dbo.RESERVA_MESA SET estado = 'finalizada'
@@ -763,11 +790,50 @@ namespace PROYECTO_RESTAURANTE
             Navegador.AbrirPedidosConMesa(ventanaActual, numeroMesa);
         }
 
+        // Reserva confirmada de HOY (aún en su tolerancia) más próxima de la
+        // mesa: la que atiende «Confirmar llegada». null si no hay.
+        internal static ReservaVigente ObtenerReservaDeHoy(int numeroMesa)
+        {
+            using (SqlConnection conexion = new SqlConnection(CadenaConexion))
+            using (SqlCommand cmd = new SqlCommand(ReservaReglas.SqlAhora + @"
+                SELECT TOP (1) R.id_reserva, M.[número], R.nombre_cliente, R.fecha_hora,
+                       ISNULL(R.telefono, ''), R.personas, ISNULL(R.observacion, '')
+                FROM dbo.RESERVA_MESA R
+                INNER JOIN dbo.MESA M ON M.id_mesa = R.id_mesa
+                WHERE M.id_sucursal = @Sucursal AND M.[número] = @Numero
+                  AND R.estado = 'confirmada'
+                  AND CAST(R.fecha_hora AS DATE) = CAST(@Ahora AS DATE)
+                  AND DATEADD(MINUTE, @Tolerancia, R.fecha_hora) > @Ahora
+                ORDER BY R.fecha_hora ASC, R.id_reserva ASC;", conexion))
+            {
+                cmd.CommandTimeout = TiempoComando;
+                cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
+                cmd.Parameters.Add("@Numero", SqlDbType.Int).Value = numeroMesa;
+                ReservaReglas.AgregarParametros(cmd);
+                conexion.Open();
+                using (SqlDataReader rd = cmd.ExecuteReader())
+                {
+                    if (!rd.Read())
+                        return null;
+                    return new ReservaVigente
+                    {
+                        IdReserva = rd.GetInt32(0),
+                        NumeroMesa = Convert.ToInt32(rd[1]),
+                        Cliente = Convert.ToString(rd[2]),
+                        FechaHora = Convert.ToDateTime(rd[3]),
+                        Telefono = Convert.ToString(rd[4]),
+                        Personas = Convert.ToInt32(rd[5]),
+                        Observacion = Convert.ToString(rd[6])
+                    };
+                }
+            }
+        }
+
         public static void ConfirmarLlegadaPorNumeroMesa(int numeroMesa)
         {
-            ReservaVigente reserva = ObtenerReservaConfirmada(numeroMesa);
+            ReservaVigente reserva = ObtenerReservaDeHoy(numeroMesa);
             if (reserva == null)
-                throw new Exception("Esta mesa ya no tiene reserva confirmada.");
+                throw new Exception("Esta mesa no tiene una reserva confirmada para hoy.");
 
             ConfirmarLlegada(reserva.IdReserva);
         }

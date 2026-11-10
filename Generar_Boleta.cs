@@ -1052,10 +1052,11 @@ namespace PROYECTO_RESTAURANTE
                         // 6. Salón: la mesa queda libre en la MISMA transacción
                         //    (antes nadie la liberaba y quedaba 'ocupada' sin
                         //    pedido, bloqueando nuevos pedidos). Solo si no tiene
-                        //    otro pedido activo. No toca reservas.
-                        using (SqlCommand cmd = new SqlCommand(@"
+                        //    otro pedido activo. Si otra reserva confirmada debe
+                        //    tenerla apartada ahora, queda 'reservada' (ReservaReglas).
+                        using (SqlCommand cmd = new SqlCommand(ReservaReglas.SqlAhora + @"
                     UPDATE M
-                       SET estado = 'libre'
+                       SET estado = " + ReservaReglas.SqlEstadoAlLiberar + @"
                       FROM dbo.MESA M
                       INNER JOIN dbo.PEDIDO P ON P.id_mesa = M.id_mesa
                      WHERE P.id_pedido = @Pedido
@@ -1073,6 +1074,7 @@ namespace PROYECTO_RESTAURANTE
                             cmd.Parameters.Add(
                                 "@Pedido", SqlDbType.Int).Value =
                                 idPedido;
+                            ReservaReglas.AgregarParametros(cmd);
                             cmd.ExecuteNonQuery();
                         }
 

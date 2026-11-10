@@ -27,6 +27,8 @@ namespace PROYECTO_RESTAURANTE
         // Aviso discreto de reserva futura (mesa aún libre): borde dorado y ayuda.
         private readonly ToolTip ayudaReservas = new ToolTip();
         private Color? bordeEstadoOriginal;
+        // Reserva de hoy de la mesa seleccionada (para «Confirmar llegada»).
+        private ControlReservasAutomaticas.ReservaVigente reservaLlegada;
         private int grosorEstadoOriginal;
 
         public FRM_MESAS()
@@ -1101,9 +1103,21 @@ namespace PROYECTO_RESTAURANTE
 
 
 
+                                // Reserva confirmada de hoy: el cliente puede llegar
+                                // aunque la tarjeta aún figure libre (falta > 15 min).
+                                reservaLlegada = null;
+                                if (estado == "libre" || estado == "reservada")
+                                {
+                                    try { reservaLlegada = ControlReservasAutomaticas.ObtenerReservaDeHoy(numeroMesa); }
+                                    catch (Exception ex) { Registro.Error("Reservas", ex); }
+                                    if (reservaLlegada != null)
+                                        lblDetalleCliente.Text = "Reserva " + reservaLlegada.FechaHora.ToString("HH:mm") +
+                                                                 " · " + reservaLlegada.Cliente;
+                                }
+
                                 if (estado == "libre")
                                 {
-                                    btnAbrirPedido.Text = "Nuevo pedido";
+                                    btnAbrirPedido.Text = reservaLlegada != null ? "Confirmar llegada" : "Nuevo pedido";
                                     btnAbrirPedido.Enabled = true;
                                     btnReservar.Enabled = true;
                                     btnLiberarMesa.Enabled = false;
@@ -1547,29 +1561,60 @@ namespace PROYECTO_RESTAURANTE
                 return;
             }
 
-            // Si la mesa está reservada, conservar aquí
-            // la confirmación de llegada que ya implementamos.
-            if (lblDetalleEstado.Text.Trim().ToLower() == "reservada")
+            // Mesa reservada, o libre con una reserva de hoy: se muestran los
+            // datos de la reserva para verificar al cliente antes de confirmar.
+            bool reservada = lblDetalleEstado.Text.Trim().ToLower() == "reservada";
+            if (reservada || btnAbrirPedido.Text == "Confirmar llegada")
             {
-                DialogResult respuesta = MessageBox.Show(
-                    "¿Llegó el comensal de la Mesa " +
-                    mesaSeleccionada + "?",
-                    "Confirmar llegada",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
+                ControlReservasAutomaticas.ReservaVigente r;
+                try { r = ControlReservasAutomaticas.ObtenerReservaDeHoy(mesaSeleccionada); }
+                catch (Exception ex) { MessageBox.Show("No se pudo consultar la reserva:\n" + ex.Message); return; }
 
-                if (respuesta != DialogResult.Yes)
-                    return;
-
-                try
+                if (r == null && reservada)
                 {
-                    ControlReservasAutomaticas
-                        .ConfirmarLlegadaPorNumeroMesa(mesaSeleccionada);
+                    MessageBox.Show("La Mesa " + mesaSeleccionada + " no tiene una reserva confirmada para hoy.",
+                        "Confirmar llegada", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    RefrescarMesasAutomaticamente(null, EventArgs.Empty);
+                    return;
                 }
-                catch (Exception ex)
+
+                if (r != null)
                 {
-                    MessageBox.Show(ex.Message);
-                    return;
+                    bool antes = r.FechaHora > DateTime.Now.AddMinutes(ReservaReglas.ApartadoPrevioMinutos);
+                    DialogResult respuesta = MessageBox.Show(
+                        "Verifique al cliente de la reserva:\n\n" +
+                        "Reserva N.º " + r.IdReserva + "\n" +
+                        "Mesa: " + r.NumeroMesa + "\n" +
+                        "Cliente: " + r.Cliente + "\n" +
+                        "Teléfono: " + (r.Telefono.Length == 0 ? "-" : r.Telefono) + "\n" +
+                        "Hora reservada: " + r.FechaHora.ToString("HH:mm") + "\n" +
+                        "Personas: " + r.Personas +
+                        (r.Observacion.Length > 0 ? "\nObservación: " + r.Observacion : "") + "\n\n" +
+                        (antes ? "Llega antes de su horario (confirmación anticipada).\n\n" : "") +
+                        "Sí: es el cliente de la reserva (confirmar llegada y abrir su pedido).\n" +
+                        (reservada ? "No: no es el cliente (la mesa sigue apartada)."
+                                   : "No: es otro cliente (pedido normal, sujeto a la reserva próxima)."),
+                        "Confirmar llegada",
+                        reservada ? MessageBoxButtons.YesNo : MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button2);
+
+                    if (respuesta == DialogResult.Cancel || (reservada && respuesta != DialogResult.Yes))
+                        return;
+
+                    if (respuesta == DialogResult.Yes)
+                    {
+                        try
+                        {
+                            ControlReservasAutomaticas.ConfirmarLlegada(r.IdReserva);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(ex.Message, "Confirmar llegada", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            RefrescarMesasAutomaticamente(null, EventArgs.Empty);
+                            return;
+                        }
+                    }
                 }
             }
 
@@ -1607,7 +1652,7 @@ namespace PROYECTO_RESTAURANTE
                 INNER JOIN dbo.MESA M ON M.id_mesa = P.id_mesa
                 WHERE P.id_pedido = @Pedido
                   AND P.estado = 'cobrado'
-                  AND M.estado = 'libre';", conexion, transaccion))
+                  AND M.estado IN ('libre', 'reservada');", conexion, transaccion))
             {
                 cmd.Parameters.Add("@Pedido", SqlDbType.Int).Value = idPedido;
                 return Convert.ToInt32(cmd.ExecuteScalar()) == 1;
@@ -1707,9 +1752,9 @@ namespace PROYECTO_RESTAURANTE
                         conexion.BeginTransaction(
                             IsolationLevel.Serializable))
                     {
-                        string sql = @"
+                        string sql = ReservaReglas.SqlAhora + @"
                     UPDATE M
-                    SET estado = 'libre'
+                    SET estado = " + ReservaReglas.SqlEstadoAlLiberar + @"
                     FROM dbo.MESA M
                     WHERE M.[número] = @Mesa
                       AND M.id_sucursal = 1
@@ -1761,6 +1806,7 @@ namespace PROYECTO_RESTAURANTE
                             cmd.Parameters.Add(
                                 "@Pedido", SqlDbType.Int).Value =
                                 idPedido;
+                            ReservaReglas.AgregarParametros(cmd);
 
                             int filas = cmd.ExecuteNonQuery();
 

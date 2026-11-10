@@ -70,6 +70,8 @@ namespace PROYECTO_RESTAURANTE
             btnDocFactura.BringToFront();
             btnDocRecibo.Click += (s, e) => CambiarDocumento(false);
             btnDocFactura.Click += (s, e) => CambiarDocumento(true);
+            // En la factura, el tercer cuadro es la dirección fiscal: se ve en la vista previa.
+            txtCelularCliente.TextChanged += (s, e) => { if (esFactura && !cargandoCliente) MostrarClienteEnVistaPrevia(); };
             consejosBoleta.SetToolTip(btnDocRecibo, "Recibo de venta: DNI (8 dígitos) y nombres y apellidos completos.");
             consejosBoleta.SetToolTip(btnDocFactura, "Factura académica: RUC (11 dígitos), razón social y dirección fiscal.");
             ConfigurarCamposDocumento();

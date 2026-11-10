@@ -63,6 +63,7 @@ namespace PROYECTO_RESTAURANTE
         private Label lblPrevCliente;
         private Label lblPrevDocumento;
         private Dictionary<Control, int> topsVistaPrevia;
+        private int altoEncabezadoPrevia;          // alto original del encabezado del recibo
         private readonly ToolTip consejosBoleta = new ToolTip();
 
         // true: abrir un pedido ya cobrado solo para reimprimir su recibo.
@@ -422,6 +423,7 @@ namespace PROYECTO_RESTAURANTE
                 topsVistaPrevia = new Dictionary<Control, int>();
                 foreach (Control c in padre.Controls)
                     topsVistaPrevia[c] = c.Top;
+                altoEncabezadoPrevia = padre.Height;
                 padre.Controls.Add(lblPrevCliente);
                 padre.Controls.Add(lblPrevDocumento);
             }
@@ -460,6 +462,9 @@ namespace PROYECTO_RESTAURANTE
                 if (par.Key.IsDisposed) continue;
                 par.Key.Top = par.Value >= baseY - 2 ? par.Value + alto : par.Value;
             }
+            // El encabezado crece lo mismo que se desplaza su contenido: así el
+            // renglón del documento (DNI/RUC) y la línea separadora no se recortan.
+            padre.Height = altoEncabezadoPrevia + alto;
             padre.ResumeLayout(true);
         }
 

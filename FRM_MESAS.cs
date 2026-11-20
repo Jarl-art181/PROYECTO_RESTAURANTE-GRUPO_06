@@ -2,6 +2,7 @@
 using Guna.Charts.WinForms;
 using Guna.UI2.WinForms;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
@@ -29,6 +30,15 @@ namespace PROYECTO_RESTAURANTE
         private Color? bordeEstadoOriginal;
         // Reserva de hoy de la mesa seleccionada (para «Confirmar llegada»).
         private ControlReservasAutomaticas.ReservaVigente reservaLlegada;
+        // Llegada confirmada de la mesa que aún no tiene pedido.
+        private ControlReservasAutomaticas.ReservaVigente llegadaPendiente;
+        // Reserva elegida en la tabla de reservas pendientes (se cancela por su id).
+        private int? reservaElegidaTabla;
+        private string textoLiberarOriginal;
+        // Mesa ocupada con reserva en conflicto: «Reservar» pasa a «Confirmar
+        // llegada» (cliente aún no registrado) o «Reasignar mesa» (en espera).
+        private ControlReservasAutomaticas.ReservaVigente conflictoMesa;
+        private string textoReservarOriginal;
         private int grosorEstadoOriginal;
 
         public FRM_MESAS()
@@ -36,6 +46,8 @@ namespace PROYECTO_RESTAURANTE
 
 
             InitializeComponent();
+            // «Buscar mesa...» filtra al escribir (la conexión se perdió en el diseñador).
+            txtBuscarMesa.TextChanged += (s, args) => FiltrarMesas();
             this.VisibleChanged += FRM_MESAS_VisibleChanged;
             this.FormClosed += (s, args) =>
                 ControlReservasAutomaticas.MesasActualizadas -= RefrescarMesasAutomaticamente;
@@ -50,6 +62,11 @@ namespace PROYECTO_RESTAURANTE
             // El Designer no vinculaba «Reservar» del panel de la mesa.
             btnReservar.Click -= btnReservar_Click;
             btnReservar.Click += btnReservar_Click;
+            // Tabla de reservas: solo pendientes (confirmadas en su tolerancia).
+            guna2HtmlLabel90.Text = "Reservas pendientes";
+            textoLiberarOriginal = btnLiberarMesa.Text;
+            textoReservarOriginal = btnReservar.Text;
+            dgvHistorialMesas.CellClick += ElegirReservaDeTabla;
             ReenviarClicDeIconos();
 
             // Configuración de la ventana.
@@ -110,6 +127,14 @@ namespace PROYECTO_RESTAURANTE
         private void btnLiberarMesa_Click(
             object sender, EventArgs e)
         {
+            // Reserva elegida en la tabla: se cancela por su id_reserva, aunque
+            // la mesa esté libre u ocupada (no libera una mesa ocupada).
+            if (reservaElegidaTabla.HasValue)
+            {
+                CancelarReservaElegida(reservaElegidaTabla.Value);
+                return;
+            }
+
             // =====================================
             // 1. VALIDAR MESA SELECCIONADA
             // =====================================
@@ -129,6 +154,35 @@ namespace PROYECTO_RESTAURANTE
             if (lblDetalleEstado.Text.Trim().ToLower() == "ocupada")
             {
                 CobrarYLiberarMesaOcupada();
+                return;
+            }
+
+            // Cliente que llegó y se retiró sin pedido: se anula su llegada.
+            if (llegadaPendiente != null && lblDetalleEstado.Text.Trim().ToLower() == "reservada")
+            {
+                if (MessageBox.Show(
+                        "La Mesa " + mesaSeleccionada + " está apartada para el cliente que ya llegó:" + "\n\n" +
+                        "Reserva N.º " + llegadaPendiente.IdReserva + " · " + llegadaPendiente.Cliente + " · " +
+                        llegadaPendiente.FechaHora.ToString("HH:mm") + "\n\n" +
+                        "Si se retiró sin pedir, se anula la llegada (la reserva queda cancelada) " +
+                        "y la mesa se libera. ¿Continuar?",
+                        "Anular llegada", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+                    return;
+                try
+                {
+                    bool libre = ControlReservasAutomaticas.AnularLlegadaSinPedido(llegadaPendiente.IdReserva);
+                    ActualizarTodo();
+                    MessageBox.Show("Llegada anulada." + (libre ? "\nMesa " + mesaSeleccionada + " disponible." : ""),
+                        "Gestión de mesas", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    Registro.Error("Mesas", ex);
+                    ActualizarTodo();
+                    MessageBox.Show("No se pudo anular la llegada:\n" + ex.Message,
+                        "Gestión de mesas", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
                 return;
             }
 
@@ -209,6 +263,88 @@ namespace PROYECTO_RESTAURANTE
                     "Gestión de mesas",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
+            }
+        }
+
+        // Fila de la tabla de reservas: el botón pasa a «Cancelar reserva» para
+        // esa reserva (por su id), sin importar el estado de la mesa.
+        private void ElegirReservaDeTabla(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.RowIndex >= dgvHistorialMesas.Rows.Count)
+                return;
+            DataRowView fila = dgvHistorialMesas.Rows[e.RowIndex].DataBoundItem as DataRowView;
+            if (fila == null)
+                return;
+            reservaElegidaTabla = Convert.ToInt32(fila["Numero"]);
+            MostrarBotonCancelarReserva();
+        }
+
+        private void MostrarBotonCancelarReserva()
+        {
+            btnLiberarMesa.Text = "       Cancelar reserva";
+            btnLiberarMesa.Enabled = true;
+        }
+
+        private void OlvidarReservaDeTabla()
+        {
+            if (!reservaElegidaTabla.HasValue)
+                return;
+            reservaElegidaTabla = null;
+            btnLiberarMesa.Text = textoLiberarOriginal;
+            string estado = lblDetalleEstado.Text.Trim().ToLower();
+            btnLiberarMesa.Enabled = mesaSeleccionada > 0 && (estado == "ocupada" || estado == "reservada");
+            dgvHistorialMesas.ClearSelection();
+        }
+
+        private void CancelarReservaElegida(int idReserva)
+        {
+            ControlReservasAutomaticas.ReservaVigente r;
+            try { r = ControlReservasAutomaticas.ObtenerReservaVigentePorId(idReserva); }
+            catch (Exception ex)
+            {
+                Registro.Error("Mesas", ex);
+                MessageBox.Show("No se pudo consultar la reserva:\n" + ex.Message, "Cancelar reserva",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (r == null)
+            {
+                MessageBox.Show("La reserva N.º " + idReserva + " ya no está pendiente.", "Cancelar reserva",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                OlvidarReservaDeTabla();
+                ActualizarTodo();
+                return;
+            }
+            if (MessageBox.Show(
+                    "Se cancelará la reserva:\n\n" +
+                    "Reserva N.º " + r.IdReserva + "\n" +
+                    "Mesa: " + r.NumeroMesa + "\n" +
+                    "Cliente: " + r.Cliente + "\n" +
+                    "Fecha y hora: " + r.FechaHora.ToString("dd/MM/yyyy HH:mm") + "\n" +
+                    (r.Llego ? "Situación: el cliente llegó y espera mesa (se cancela su espera).\n" : "") + "\n" +
+                    "Las demás reservas y el pedido activo de la mesa no cambian.\n" +
+                    "¿Desea cancelarla?",
+                    "Cancelar reserva", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+                return;
+            try
+            {
+                bool liberada = r.Llego
+                    ? ControlReservasAutomaticas.AnularLlegadaSinPedido(r.IdReserva)
+                    : ControlReservasAutomaticas.CancelarReserva(r.IdReserva);
+                OlvidarReservaDeTabla();
+                ActualizarTodo();
+                MessageBox.Show("Reserva N.º " + r.IdReserva + " cancelada." +
+                    (liberada ? "\nMesa " + r.NumeroMesa + " disponible." : ""),
+                    "Gestión de mesas", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                Registro.Error("Mesas", ex);
+                OlvidarReservaDeTabla();
+                ActualizarTodo();
+                MessageBox.Show("No se pudo cancelar la reserva:\n" + ex.Message, "Gestión de mesas",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -458,6 +594,9 @@ namespace PROYECTO_RESTAURANTE
         P.id_pedido AS NumeroPedido,
         RX.fecha_hora AS ProximaReserva,
         RX.id_reserva AS NumeroReserva,
+        RC.fecha_hora AS ConflictoHora,
+        RC.nombre_cliente AS ConflictoCliente,
+        RC.llego AS ConflictoLlego,
 
         LTRIM(RTRIM(
             ISNULL(E.nombre, '') + ' ' +
@@ -499,6 +638,19 @@ namespace PROYECTO_RESTAURANTE
           AND CAST(R.fecha_hora AS DATE) = CAST(@Ahora AS DATE)
         ORDER BY R.fecha_hora, R.id_reserva
     ) RX
+
+    -- Conflicto de una mesa ocupada: cliente que ya llegó y espera, o
+    -- reserva confirmada que ya debe apartarla (regla de ReservaReglas).
+    OUTER APPLY
+    (
+        SELECT TOP (1) R.fecha_hora, R.nombre_cliente,
+               CASE WHEN R.estado = 'finalizada' THEN 1 ELSE 0 END AS llego
+        FROM dbo.RESERVA_MESA R
+        WHERE R.id_mesa = M.id_mesa
+          AND ((" + ReservaReglas.SqlLlegadaPendiente + @")
+               OR (R.estado = 'confirmada' AND " + ReservaReglas.SqlDebeEstarApartada + @"))
+        ORDER BY CASE WHEN R.estado = 'finalizada' THEN 0 ELSE 1 END, R.fecha_hora
+    ) RC
 
     WHERE M.id_sucursal = @Sucursal
       AND M.[número] BETWEEN 1 AND 10
@@ -669,6 +821,19 @@ namespace PROYECTO_RESTAURANTE
                                     pedidos[posicion].Text = "";
                                     meseros[posicion].Text = "";
                                     panelesPedido[posicion].Visible = false;
+
+                                    // Reserva próxima / en espera con la mesa aún ocupada:
+                                    // sigue «Ocupada» (su pedido no cambia) con borde dorado
+                                    // y el aviso del conflicto al pasar el mouse.
+                                    if (lector["ConflictoHora"] != DBNull.Value)
+                                    {
+                                        DateTime hora = Convert.ToDateTime(lector["ConflictoHora"]);
+                                        estados[posicion].BorderColor = Color.Goldenrod;
+                                        estados[posicion].BorderThickness = 3;
+                                        AyudaEstado(estados[posicion],
+                                            ReservaReglas.TextoConflicto(hora, Convert.ToInt32(lector["ConflictoLlego"]) == 1, ReservaReglas.AhoraServidor()) +
+                                            "\nReserva " + hora.ToString("HH:mm") + " · " + Convert.ToString(lector["ConflictoCliente"]));
+                                    }
                                 }
 
                                 // ==============================
@@ -869,6 +1034,7 @@ namespace PROYECTO_RESTAURANTE
                 return;
 
             mesaSeleccionada = numeroMesa;
+            OlvidarReservaDeTabla();
 
             // Solo datos basicos, estado y botones.
             // Los productos se muestran al pulsar Detalle pedido.
@@ -1106,7 +1272,16 @@ namespace PROYECTO_RESTAURANTE
                                 // Reserva confirmada de hoy: el cliente puede llegar
                                 // aunque la tarjeta aún figure libre (falta > 15 min).
                                 reservaLlegada = null;
-                                if (estado == "libre" || estado == "reservada")
+                                llegadaPendiente = null;
+                                if (estado == "reservada")
+                                {
+                                    try { llegadaPendiente = ControlReservasAutomaticas.ObtenerLlegadaPendiente(numeroMesa); }
+                                    catch (Exception ex) { Registro.Error("Reservas", ex); }
+                                    if (llegadaPendiente != null)
+                                        lblDetalleCliente.Text = "Llegó: reserva " + llegadaPendiente.FechaHora.ToString("HH:mm") +
+                                                                 " · " + llegadaPendiente.Cliente;
+                                }
+                                if (llegadaPendiente == null && (estado == "libre" || estado == "reservada"))
                                 {
                                     try { reservaLlegada = ControlReservasAutomaticas.ObtenerReservaDeHoy(numeroMesa); }
                                     catch (Exception ex) { Registro.Error("Reservas", ex); }
@@ -1129,9 +1304,10 @@ namespace PROYECTO_RESTAURANTE
                                     btnReservar.Enabled = false;
                                     btnLiberarMesa.Enabled = true;
                                 }
+
                                 else if (estado == "reservada")
                                 {
-                                    btnAbrirPedido.Text = "Confirmar llegada";
+                                    btnAbrirPedido.Text = llegadaPendiente != null ? "Abrir pedido" : "Confirmar llegada";
                                     btnAbrirPedido.Enabled = true;
                                     btnReservar.Enabled = false;
                                     btnLiberarMesa.Enabled = true;
@@ -1143,6 +1319,52 @@ namespace PROYECTO_RESTAURANTE
                                     btnReservar.Enabled = false;
                                     btnLiberarMesa.Enabled = false;
                                 }
+
+                                // Mesa ocupada: el cliente de la reserva puede llegar y
+                                // esperar, o trasladarse a otra mesa libre.
+                                conflictoMesa = null;
+                                btnReservar.Text = textoReservarOriginal;
+                                if (estado == "ocupada")
+                                {
+                                    ControlReservasAutomaticas.ReservaVigente hoy = null;
+                                    try
+                                    {
+                                        conflictoMesa = ControlReservasAutomaticas.ObtenerConflictoMesaOcupada(numeroMesa);
+                                        if (conflictoMesa == null || !conflictoMesa.Llego)
+                                            hoy = ControlReservasAutomaticas.ObtenerReservaDeHoy(numeroMesa);
+                                    }
+                                    catch (Exception ex) { Registro.Error("Reservas", ex); }
+
+                                    if (conflictoMesa != null)
+                                    {
+                                        string cliente = conflictoMesa.Cliente.Length > 18 ? conflictoMesa.Cliente.Substring(0, 17) + "…" : conflictoMesa.Cliente;
+                                        string aviso = ReservaReglas.TextoConflicto(conflictoMesa.FechaHora, conflictoMesa.Llego, ReservaReglas.AhoraServidor());
+                                        lblDetalleCliente.Text = (conflictoMesa.Llego ? "Llegó, esperando · " : "Reserva ") +
+                                                                 conflictoMesa.FechaHora.ToString("HH:mm") + " · " + cliente;
+                                        ayudaReservas.SetToolTip(textEstadoDetalleMesa, aviso);
+                                        ayudaReservas.SetToolTip(lblDetalleCliente, aviso);
+                                    }
+                                    if (conflictoMesa != null && conflictoMesa.Llego)
+                                    {
+                                        btnReservar.Text = "       Reasignar mesa";
+                                        btnReservar.Enabled = true;
+                                    }
+                                    else if (hoy != null)
+                                    {
+                                        conflictoMesa = conflictoMesa ?? hoy;
+                                        btnReservar.Text = "       Confirmar llegada";
+                                        btnReservar.Enabled = true;
+                                    }
+                                }
+                                else
+                                {
+                                    ayudaReservas.SetToolTip(textEstadoDetalleMesa, null);
+                                    ayudaReservas.SetToolTip(lblDetalleCliente, null);
+                                }
+
+                                // Una reserva elegida en la tabla conserva «Cancelar reserva».
+                                if (reservaElegidaTabla.HasValue)
+                                    MostrarBotonCancelarReserva();
 
                                 // ========================================
                                 // 12. CAMBIAR EL FILLCOLOR DE LOS BOTONES
@@ -1323,7 +1545,7 @@ namespace PROYECTO_RESTAURANTE
                 // 1. CONSULTAR RESERVAS EN SQL SERVER
                 // =====================================
 
-                string sql = @"
+                string sql = ReservaReglas.SqlAhora + @"
             SELECT
                 R.id_reserva AS Numero,
 
@@ -1342,7 +1564,9 @@ namespace PROYECTO_RESTAURANTE
                 CASE
                     WHEN R.estado = 'confirmada'
                         THEN 'Confirmada'
-                    ELSE R.estado
+                    WHEN M.estado = 'ocupada'
+                        THEN 'Llegó · esperando mesa'
+                    ELSE 'Llegó · mesa apartada'
                 END AS Estado,
 
                 ISNULL(
@@ -1356,11 +1580,13 @@ namespace PROYECTO_RESTAURANTE
                 ON R.id_mesa = M.id_mesa
 
             WHERE M.id_sucursal = @Sucursal
-              AND R.estado = 'confirmada'
-
-              AND DATEADD(
-                    MINUTE, 120, R.fecha_hora
-                  ) > SYSDATETIME()
+              AND (
+                    -- Sin llegada: dentro de la tolerancia de llegada (30 min).
+                    (R.estado = 'confirmada'
+                     AND DATEADD(MINUTE, @Tolerancia, R.fecha_hora) > @Ahora)
+                    -- Con llegada registrada y aún sin pedido (sin vencimiento).
+                    OR (" + ReservaReglas.SqlLlegadaPendiente + @")
+                  )
 
             ORDER BY
                 R.fecha_hora ASC,
@@ -1376,6 +1602,7 @@ namespace PROYECTO_RESTAURANTE
                     comando.Parameters.Add(
                         "@Sucursal", SqlDbType.Int
                     ).Value = 1;
+                    ReservaReglas.AgregarParametros(comando);
 
                     using (SqlDataAdapter adaptador =
                         new SqlDataAdapter(comando))
@@ -1540,6 +1767,25 @@ namespace PROYECTO_RESTAURANTE
                 dgvHistorialMesas.DataSource = tabla;
 
                 dgvHistorialMesas.ClearSelection();
+
+                // Conservar la reserva elegida tras un refresco automático;
+                // si ya no está pendiente (cancelada o vencida), se olvida.
+                if (reservaElegidaTabla.HasValue)
+                {
+                    bool sigue = false;
+                    foreach (DataGridViewRow fila in dgvHistorialMesas.Rows)
+                    {
+                        DataRowView datos = fila.DataBoundItem as DataRowView;
+                        if (datos != null && Convert.ToInt32(datos["Numero"]) == reservaElegidaTabla.Value)
+                        {
+                            fila.Selected = true;
+                            sigue = true;
+                            break;
+                        }
+                    }
+                    if (sigue) MostrarBotonCancelarReserva();
+                    else OlvidarReservaDeTabla();
+                }
             }
             catch (Exception ex)
             {
@@ -1561,9 +1807,17 @@ namespace PROYECTO_RESTAURANTE
                 return;
             }
 
+            // Cliente que ya llegó (sin pedido aún): Pedidos con su reserva exacta.
+            bool reservada = lblDetalleEstado.Text.Trim().ToLower() == "reservada";
+            if (reservada && llegadaPendiente != null)
+            {
+                Navegador.AbrirPedidosConMesa(this, mesaSeleccionada, llegadaPendiente.IdReserva);
+                return;
+            }
+
             // Mesa reservada, o libre con una reserva de hoy: se muestran los
             // datos de la reserva para verificar al cliente antes de confirmar.
-            bool reservada = lblDetalleEstado.Text.Trim().ToLower() == "reservada";
+            int? reservaParaPedido = null;
             if (reservada || btnAbrirPedido.Text == "Confirmar llegada")
             {
                 ControlReservasAutomaticas.ReservaVigente r;
@@ -1580,7 +1834,7 @@ namespace PROYECTO_RESTAURANTE
 
                 if (r != null)
                 {
-                    bool antes = r.FechaHora > DateTime.Now.AddMinutes(ReservaReglas.ApartadoPrevioMinutos);
+                    bool antes = r.FechaHora > ReservaReglas.AhoraLocal().AddMinutes(ReservaReglas.ApartadoPrevioMinutos);
                     DialogResult respuesta = MessageBox.Show(
                         "Verifique al cliente de la reserva:\n\n" +
                         "Reserva N.º " + r.IdReserva + "\n" +
@@ -1606,7 +1860,14 @@ namespace PROYECTO_RESTAURANTE
                     {
                         try
                         {
-                            ControlReservasAutomaticas.ConfirmarLlegada(r.IdReserva);
+                            if (ControlReservasAutomaticas.ConfirmarLlegada(r.IdReserva))
+                            {
+                                ActualizarTodo();
+                                MessageBox.Show("La mesa se ocupó: el cliente queda «esperando mesa».",
+                                    "Confirmar llegada", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                return;
+                            }
+                            reservaParaPedido = r.IdReserva;
                         }
                         catch (Exception ex)
                         {
@@ -1618,10 +1879,10 @@ namespace PROYECTO_RESTAURANTE
                 }
             }
 
-            // Abrir pedidos con la mesa seleccionada.
-            // El Navegador descarta un Pedidos anterior (avisando si
-            // tiene productos sin guardar) y crea uno para esta mesa.
-            Navegador.AbrirPedidosConMesa(this, mesaSeleccionada);
+            // Abrir pedidos con la mesa seleccionada (y la reserva exacta si
+            // se confirmó la llegada). El Navegador descarta un Pedidos anterior
+            // (avisando si tiene productos sin guardar) y crea uno para esta mesa.
+            Navegador.AbrirPedidosConMesa(this, mesaSeleccionada, reservaParaPedido);
         }
 
         // «Reservar» del panel de la mesa: abre la MISMA ventana que «Nueva
@@ -1639,7 +1900,154 @@ namespace PROYECTO_RESTAURANTE
                 return;
             }
 
+            // Mesa ocupada con reserva en conflicto (texto del botón).
+            string accion = btnReservar.Text.Trim();
+            if (conflictoMesa != null && accion == "Confirmar llegada")
+            {
+                RegistrarLlegadaConMesaOcupada(conflictoMesa);
+                return;
+            }
+            if (conflictoMesa != null && accion == "Reasignar mesa")
+            {
+                ReasignarReservaAMesaLibre(conflictoMesa.IdReserva);
+                return;
+            }
+
             AbrirNuevaReserva(mesaSeleccionada);
+        }
+
+        // El cliente de la reserva llegó y la mesa sigue ocupada: se registra
+        // «Cliente llegó, esperando mesa» sin tocar el pedido activo.
+        private void RegistrarLlegadaConMesaOcupada(ControlReservasAutomaticas.ReservaVigente r)
+        {
+            if (MessageBox.Show(
+                    "Verifique al cliente de la reserva:\n\n" +
+                    "Reserva N.º " + r.IdReserva + "\n" +
+                    "Cliente: " + r.Cliente + "\n" +
+                    "Teléfono: " + (r.Telefono.Length == 0 ? "-" : r.Telefono) + "\n" +
+                    "Hora reservada: " + r.FechaHora.ToString("HH:mm") + " · Personas: " + r.Personas + "\n\n" +
+                    "La Mesa " + r.NumeroMesa + " sigue ocupada por el cliente anterior: su pedido no cambia.\n" +
+                    "Se registrará «Cliente llegó, esperando mesa» (la espera no vence a los 30 minutos).\n\n" +
+                    "¿Registrar la llegada?",
+                    "Confirmar llegada", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+                return;
+            try
+            {
+                ControlReservasAutomaticas.ConfirmarLlegada(r.IdReserva);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Confirmar llegada", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ActualizarTodo();
+                return;
+            }
+            ActualizarTodo();
+            if (MessageBox.Show(
+                    "Llegada registrada: el cliente espera mesa.\n\n" +
+                    "¿Desea trasladarlo ahora a otra mesa libre?",
+                    "Cliente esperando mesa", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+                ReasignarReservaAMesaLibre(r.IdReserva);
+        }
+
+        // Traslada la reserva a una mesa libre elegida (validada de nuevo en la
+        // transacción de ReasignarReserva). Sin mesas, el cliente sigue en espera.
+        private void ReasignarReservaAMesaLibre(int idReserva)
+        {
+            List<int> mesas;
+            ControlReservasAutomaticas.ReservaVigente r;
+            try
+            {
+                r = ControlReservasAutomaticas.ObtenerReservaVigentePorId(idReserva);
+                mesas = r == null ? new List<int>() : ControlReservasAutomaticas.MesasParaReasignar(idReserva);
+            }
+            catch (Exception ex)
+            {
+                Registro.Error("Mesas", ex);
+                MessageBox.Show("No se pudieron consultar las mesas:\n" + ex.Message, "Reasignar mesa",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (r == null)
+            {
+                MessageBox.Show("La reserva N.º " + idReserva + " ya no está vigente.", "Reasignar mesa",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ActualizarTodo();
+                return;
+            }
+            if (mesas.Count == 0)
+            {
+                MessageBox.Show(
+                    "No hay mesas libres con capacidad para " + r.Personas + " personas y sin otra reserva cercana.\n\n" +
+                    "El cliente de la reserva N.º " + r.IdReserva + " (" + r.Cliente + ") sigue esperando la Mesa " + r.NumeroMesa + ".\n" +
+                    "No se abre un pedido sobre la mesa ocupada.",
+                    "Sin mesas disponibles", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int? destino = ElegirMesaDestino(r, mesas);
+            if (!destino.HasValue)
+                return;
+            try
+            {
+                ControlReservasAutomaticas.ReasignarReserva(idReserva, destino.Value);
+            }
+            catch (Exception ex)
+            {
+                ActualizarTodo();
+                MessageBox.Show("No se pudo reasignar la reserva:\n" + ex.Message + "\n\nEl cliente sigue en espera.",
+                    "Reasignar mesa", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            ActualizarTodo();
+            if (r.Llego)
+            {
+                if (MessageBox.Show(
+                        "Reserva N.º " + r.IdReserva + " trasladada a la Mesa " + destino.Value + ", reservada para " + r.Cliente + ".\n\n" +
+                        "¿Abrir su pedido ahora?",
+                        "Reasignar mesa", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                    Navegador.AbrirPedidosConMesa(this, destino.Value, r.IdReserva);
+            }
+            else
+            {
+                MessageBox.Show("Reserva N.º " + r.IdReserva + " trasladada a la Mesa " + destino.Value + ".",
+                    "Reasignar mesa", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        // Lista sencilla de mesas destino (ventana en código, sin diseño nuevo).
+        private int? ElegirMesaDestino(ControlReservasAutomaticas.ReservaVigente r, List<int> mesas)
+        {
+            using (Form f = new Form())
+            {
+                f.Text = "Reasignar reserva N.º " + r.IdReserva;
+                f.ClientSize = new Size(360, 170);
+                f.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+                f.StartPosition = FormStartPosition.CenterParent;
+                f.BackColor = Color.White;
+                f.ShowInTaskbar = false;
+                Label texto = new Label
+                {
+                    Text = r.Cliente + " · " + r.Personas + " personas\nMesa libre de destino:",
+                    Bounds = new Rectangle(16, 12, 330, 40), Font = new Font("Segoe UI", 10F)
+                };
+                ComboBox lista = new ComboBox
+                {
+                    DropDownStyle = ComboBoxStyle.DropDownList, Bounds = new Rectangle(16, 60, 328, 28),
+                    Font = new Font("Segoe UI", 10F)
+                };
+                foreach (int m in mesas) lista.Items.Add("Mesa " + m);
+                lista.SelectedIndex = 0;
+                Guna2Button aceptar = new Guna2Button { Text = "Reasignar", BorderRadius = 10, FillColor = Color.Gold, ForeColor = Color.Black, Font = new Font("Segoe UI", 10F, FontStyle.Bold), Bounds = new Rectangle(190, 112, 154, 40) };
+                Guna2Button cancelar = new Guna2Button { Text = "Cancelar", BorderRadius = 10, FillColor = Color.Gainsboro, ForeColor = Color.Black, Font = new Font("Segoe UI", 10F, FontStyle.Bold), Bounds = new Rectangle(16, 112, 154, 40) };
+                aceptar.Click += (s, e) => { f.DialogResult = DialogResult.OK; };
+                cancelar.Click += (s, e) => { f.DialogResult = DialogResult.Cancel; };
+                f.Controls.AddRange(new Control[] { texto, lista, aceptar, cancelar });
+                if (f.ShowDialog(this) != DialogResult.OK)
+                    return null;
+                return mesas[lista.SelectedIndex];
+            }
         }
 
         // true si el pedido quedó cobrado y su mesa ya está libre.

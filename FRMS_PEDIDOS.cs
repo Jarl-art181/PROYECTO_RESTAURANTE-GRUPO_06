@@ -237,11 +237,27 @@ namespace PROYECTO_RESTAURANTE
         }
 
         // ABRIR PEDIDOS CON UNA MESA ENVIADA DESDE GESTIÓN DE MESAS
-        public FRMS_PEDIDOS(int numeroMesa) : this()
+        public FRMS_PEDIDOS(int numeroMesa) : this(numeroMesa, null)
+        {
+        }
+
+        // Pedido del cliente de una reserva con llegada confirmada: el
+        // id_reserva llega EXPLÍCITO desde «Confirmar llegada».
+        public FRMS_PEDIDOS(int numeroMesa, int? idReservaLlegada) : this()
         {
             numeroMesaDesdeGestion = numeroMesa;
+            this.idReservaLlegada = idReservaLlegada;
 
             Shown += AbrirMesaSeleccionada;
+        }
+
+        // Reserva con llegada confirmada (solo para su mesa, idMesaLlegada).
+        private int? idReservaLlegada;
+        private int? idMesaLlegada;
+
+        private int? ReservaLlegadaDeMesa(int idMesa)
+        {
+            return idReservaLlegada.HasValue && idMesaLlegada == idMesa ? idReservaLlegada : null;
         }
 
         private void AbrirMesaSeleccionada(object sender, EventArgs e)
@@ -274,6 +290,18 @@ namespace PROYECTO_RESTAURANTE
                     return;
                 }
 
+                // Cliente de una reserva y mesa todavía ocupada por el cliente
+                // anterior: no se abre el pedido ajeno ni se mezclan productos.
+                if (idReservaLlegada.HasValue && info.Estado == "ocupada")
+                {
+                    MessageBox.Show(
+                        "La Mesa " + numeroMesa + " sigue ocupada por el cliente anterior.\n\n" +
+                        "El cliente de la reserva N.º " + idReservaLlegada.Value + " queda esperando mesa. " +
+                        "Puede reasignarlo a otra mesa libre en Gestión de Mesas.",
+                        "Mesa ocupada", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
                 // Una mesa ocupada NO se selecciona como si estuviera libre.
                 // Se consulta su pedido activo directamente por id_mesa.
                 if (info.Estado == "ocupada")
@@ -303,9 +331,14 @@ namespace PROYECTO_RESTAURANTE
                     return;
                 }
 
-                // Una mesa libre (o ya liberada tras confirmar la llegada)
-                // permite comenzar un pedido nuevo con Salón y mesa elegidos.
-                if (info.Estado == "libre")
+                // La reserva de la llegada confirmada corresponde a ESTA mesa.
+                if (idReservaLlegada.HasValue)
+                    idMesaLlegada = info.IdMesa;
+
+                // Una mesa libre, o apartada para el cliente cuya llegada se
+                // confirmó, permite comenzar su pedido con Salón y mesa elegidos.
+                if (info.Estado == "libre" ||
+                    (info.Estado == "reservada" && ReservaLlegadaDeMesa(info.IdMesa).HasValue))
                 {
                     BotonMesa_Click(boton, EventArgs.Empty);
                     CargarTablaPedidos();
@@ -1263,6 +1296,8 @@ namespace PROYECTO_RESTAURANTE
 
                         dgvDetalle.Columns[3]
                             .DefaultCellStyle.Format = "N2";
+                        dgvDetalle.Columns[2].DefaultCellStyle.FormatProvider = Formato.Peru;
+                        dgvDetalle.Columns[3].DefaultCellStyle.FormatProvider = Formato.Peru;
                     }
                 }
             }
@@ -1287,7 +1322,7 @@ namespace PROYECTO_RESTAURANTE
             if (control != null)
             {
                 control.Text =
-                    "S/ " + monto.ToString("N2");
+                    Formato.Soles(monto);
             }
         }
 
@@ -1636,8 +1671,20 @@ namespace PROYECTO_RESTAURANTE
                     return;
                 }
 
-                // Solo permitir mesas libres.
-                if (estadoMesa != "libre")
+                // Mesa apartada para el cliente cuya llegada se confirmó (id exacto).
+                int? llegada = ReservaLlegadaDeMesa(info.IdMesa);
+                bool esSuLlegada = false;
+                if (llegada.HasValue)
+                {
+                    using (SqlConnection conexion = new SqlConnection(cadenaConexion))
+                    {
+                        conexion.Open();
+                        esSuLlegada = ReservaReglas.LlegadaPendienteValida(conexion, null, llegada.Value, info.IdMesa);
+                    }
+                }
+
+                // Solo permitir mesas libres (o la apartada para su cliente).
+                if (estadoMesa != "libre" && !(estadoMesa == "reservada" && esSuLlegada))
                 {
                     MessageBox.Show(
                         "Esta mesa no está disponible.",
@@ -1651,11 +1698,15 @@ namespace PROYECTO_RESTAURANTE
 
                 // Mesa libre con una reserva próxima (regla de ReservaReglas):
                 // no se abre un pedido que impida apartarla.
-                string reservaProxima;
-                using (SqlConnection conexion = new SqlConnection(cadenaConexion))
+                // (El cliente de la reserva con llegada confirmada no se bloquea.)
+                string reservaProxima = null;
+                if (!esSuLlegada)
                 {
-                    conexion.Open();
-                    reservaProxima = ReservaReglas.MotivoReservaProxima(conexion, null, info.IdMesa);
+                    using (SqlConnection conexion = new SqlConnection(cadenaConexion))
+                    {
+                        conexion.Open();
+                        reservaProxima = ReservaReglas.MotivoReservaProxima(conexion, null, info.IdMesa);
+                    }
                 }
                 if (reservaProxima != null)
                 {
@@ -1929,6 +1980,21 @@ namespace PROYECTO_RESTAURANTE
             int? idMesa,
             int? idMesero)
         {
+            return CrearPedido(conexion, transaccion, canal, idMesa, idMesero, null);
+        }
+
+        // idReserva: reserva con llegada confirmada de ESTA mesa (vínculo exacto).
+        private int CrearPedido(
+            SqlConnection conexion,
+            SqlTransaction transaccion,
+            string canal,
+            int? idMesa,
+            int? idMesero,
+            int? idReserva)
+        {
+            if (idReserva.HasValue && (canal != "salon" || !idMesa.HasValue))
+                throw new Exception("Solo un pedido de Salón puede vincularse a una reserva.");
+
             // ==========================================
             // 1. VALIDAR MODALIDAD
             // ==========================================
@@ -1949,12 +2015,25 @@ namespace PROYECTO_RESTAURANTE
                         "El pedido de Salón necesita una mesa.");
                 }
 
-                // Reserva próxima de la mesa: no se abre el pedido
-                // (se vuelve a comprobar aquí, en la misma transacción).
-                string reservaProxima = ReservaReglas.MotivoReservaProxima(
-                    conexion, transaccion, idMesa.Value);
-                if (reservaProxima != null)
-                    throw new Exception(reservaProxima);
+                if (idReserva.HasValue)
+                {
+                    // Cliente de la reserva: identidad y estado comprobados aquí,
+                    // en la misma transacción (llegada confirmada, esta mesa y
+                    // sin pedido). Así no le afecta el bloqueo por reserva próxima.
+                    if (!ReservaReglas.LlegadaPendienteValida(conexion, transaccion, idReserva.Value, idMesa.Value))
+                        throw new Exception("La llegada de la reserva N.º " + idReserva.Value +
+                            " ya no está vigente para esta mesa o ya tiene su pedido." + "\n" +
+                            "Vuelva a Gestión de Mesas para revisarla.");
+                }
+                else
+                {
+                    // Otro cliente: reserva próxima de la mesa -> no se abre el pedido
+                    // (se vuelve a comprobar aquí, en la misma transacción).
+                    string reservaProxima = ReservaReglas.MotivoReservaProxima(
+                        conexion, transaccion, idMesa.Value);
+                    if (reservaProxima != null)
+                        throw new Exception(reservaProxima);
+                }
 
                 if (!idMesero.HasValue)
                 {
@@ -2014,28 +2093,22 @@ namespace PROYECTO_RESTAURANTE
             id_pedido INT NOT NULL
         );
 
-        -- Pedido de salón de una reserva con llegada confirmada
-        -- ('finalizada') y aún sin pedido: se vincula a esa reserva y
-        -- conserva quién reservó (nombre, teléfono y cliente registrado).
-        DECLARE @Reserva INT = NULL, @Contacto NVARCHAR(100) = NULL,
+        -- Pedido del cliente de una reserva con llegada confirmada: se vincula
+        -- EXACTAMENTE a @Reserva (validada antes en esta transacción) y conserva
+        -- quién reservó (nombre, teléfono y cliente registrado). Sin @Reserva,
+        -- el pedido no se vincula a ninguna reserva.
+        DECLARE @Contacto NVARCHAR(100) = NULL,
                 @Telefono VARCHAR(20) = NULL, @Cliente INT = NULL;
 
-        DECLARE @Ahora DATETIME2 = DATEADD(SECOND, @Desfase, SYSDATETIME());
-
-        IF @Canal = 'salon' AND @Mesa IS NOT NULL
-            SELECT TOP (1)
-                   @Reserva = R.id_reserva, @Contacto = R.nombre_cliente,
+        IF @Reserva IS NOT NULL
+            SELECT @Contacto = R.nombre_cliente,
                    @Telefono = R.telefono,
                    @Cliente = CASE WHEN C.estado = 'activo' THEN R.id_cliente END
             FROM dbo.RESERVA_MESA R WITH (UPDLOCK, HOLDLOCK)
             LEFT JOIN dbo.CLIENTE C ON C.id_cliente = R.id_cliente
-            WHERE R.id_mesa = @Mesa
-              AND R.estado = 'finalizada'
-              AND R.fecha_hora >= DATEADD(MINUTE, -@Duracion, @Ahora)
-              -- Llegada confirmada (también anticipada) de una reserva de hoy.
-              AND CAST(R.fecha_hora AS DATE) = CAST(@Ahora AS DATE)
-              AND NOT EXISTS (SELECT 1 FROM dbo.PEDIDO P WHERE P.id_reserva = R.id_reserva)
-            ORDER BY R.fecha_hora DESC, R.id_reserva DESC;
+            WHERE R.id_reserva = @Reserva
+              AND R.id_mesa = @Mesa
+              AND R.estado = 'finalizada';
 
         INSERT INTO dbo.PEDIDO
         (
@@ -2100,8 +2173,8 @@ namespace PROYECTO_RESTAURANTE
                     ReservaReglas.DuracionReservaMinutos;
                 cmd.Parameters.Add("@Apartado", SqlDbType.Int).Value =
                     ReservaReglas.ApartadoMinutos;
-                cmd.Parameters.Add("@Desfase", SqlDbType.Int).Value =
-                    (int)ReservaReglas.DesfasePruebas.TotalSeconds;
+                cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value =
+                    idReserva.HasValue ? (object)idReserva.Value : DBNull.Value;
 
                 object resultado = cmd.ExecuteScalar();
 
@@ -2265,11 +2338,20 @@ namespace PROYECTO_RESTAURANTE
                                         transaccion,
                                         mesa);
 
+                                int? reservaDelPedido = ReservaLlegadaDeMesa(mesa);
+
                                 if (estadoMesa == "ocupada")
                                 {
                                     if (!existente.HasValue)
                                         throw new Exception(
                                             "Mesa ocupada sin pedido activo.");
+
+                                    // Otro equipo ocupó la mesa mientras se armaba este
+                                    // pedido nuevo: no se mezclan productos de dos clientes.
+                                    if (!idPedidoSeleccionado.HasValue)
+                                        throw new Exception(
+                                            "La Mesa " + numeroMesaSeleccionada + " acaba de ocuparse con el pedido N.º " +
+                                            existente.Value + " (otro equipo). Elija otra mesa o abra ese pedido.");
 
                                     idPedido = existente.Value;
 
@@ -2281,18 +2363,22 @@ namespace PROYECTO_RESTAURANTE
                                             "Cambió el pedido de la mesa.");
                                     }
                                 }
-                                else if (estadoMesa == "libre")
+                                else if (estadoMesa == "libre" ||
+                                         (estadoMesa == "reservada" && reservaDelPedido.HasValue))
                                 {
                                     if (existente.HasValue)
                                         throw new Exception(
                                             "Mesa libre con pedido activo.");
 
+                                    // Mesa apartada: solo para el pedido de la reserva con
+                                    // llegada confirmada (CrearPedido valida su identidad).
                                     idPedido = CrearPedido(
       conexion,
       transaccion,
       "salon",
       mesa,
-      idMeseroSeleccionado);
+      idMeseroSeleccionado,
+      reservaDelPedido);
 
                                     // Marcar mesa ocupada.
                                     using (SqlCommand cmd =
@@ -2300,7 +2386,7 @@ namespace PROYECTO_RESTAURANTE
                                             UPDATE dbo.MESA
                                             SET estado = 'ocupada'
                                             WHERE id_mesa = @Mesa
-                                            AND estado = 'libre';",
+                                            AND estado IN ('libre', 'reservada');",
                                             conexion, transaccion))
                                     {
                                         cmd.Parameters.Add(
@@ -2780,15 +2866,14 @@ AND NOT EXISTS
 
                     dgvListaPedidos.Rows[fila]
                         .Cells[3].Value =
-                            "S/ " +
-                            Convert.ToDecimal(
-                                dato["Total"]).ToString("N2");
+                            Formato.Soles(Convert.ToDecimal(
+                                dato["Total"]));
 
                     dgvListaPedidos.Rows[fila]
                         .Cells[4].Value =
                             Convert.ToDateTime(
                                 dato["Fecha"])
-                            .ToString("dd/MM HH:mm");   // cabe completo en la columna
+                            .ToString("dd/MM HH:mm", System.Globalization.CultureInfo.InvariantCulture);   // cabe completo en la columna
 
                     dgvListaPedidos.Rows[fila]
                         .Cells[5].Value = "VER";
@@ -3988,8 +4073,8 @@ AND NOT EXISTS
             if (lblDescuentoPromo != null)
             {
                 lblDescuentoPromo.Text = descuento > 0
-                    ? "Descuento  - S/ " + descuento.ToString("N2")
-                    : (nota != null ? "No aplica" : "Descuento  S/ 0,00");
+                    ? "Descuento  - " + Formato.Soles(descuento)
+                    : (nota != null ? "No aplica" : "Descuento  " + Formato.Soles(0m));
                 lblDescuentoPromo.ForeColor = descuento > 0 ? Color.ForestGreen
                     : (nota != null ? Color.Firebrick : Color.DimGray);
                 consejoPromocion.SetToolTip(lblDescuentoPromo, nota ?? "");

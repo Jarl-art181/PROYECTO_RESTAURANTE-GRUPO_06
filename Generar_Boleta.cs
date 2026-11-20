@@ -36,7 +36,8 @@ namespace PROYECTO_RESTAURANTE
         private const decimal MontoIdentificacionSunat = 700m;
         // El pie del recibo ya no lleva la leyenda «Recibo interno · No es
         // comprobante electrónico SUNAT» (pedido del propietario); el recibo
-        // sigue siendo interno (serie R001). La factura conserva NotaFactura.
+        // sigue siendo interno (serie R001). La factura tampoco lleva su
+        // leyenda en el pie; se identifica como académica en el documento A4.
 
         // Número del pedido (formato PEDIDO-000019): va bajo el código de barras.
         // El número interno del recibo (R001-...) se muestra aparte, bajo el título.
@@ -118,6 +119,11 @@ namespace PROYECTO_RESTAURANTE
             {
                 return;
             }
+
+            // El vuelto se recalcula al escribir el monto recibido (la conexión
+            // se perdió en el diseñador; -= evita duplicarla si se vuelve a agregar).
+            numMontoRecibido.ValueChanged -= numMontoRecibido_ValueChanged;
+            numMontoRecibido.ValueChanged += numMontoRecibido_ValueChanged;
 
             // Orden de la ventana (coordenadas de diseño) y adaptación a la
             // pantalla: antes de conectar Shown, así se escala antes de cargar.
@@ -1504,8 +1510,8 @@ namespace PROYECTO_RESTAURANTE
                         if (t.Length > 0 && !pedido.Contains(t) && !recibo.ToLowerInvariant().Contains(t) &&
                             !MenuDatos.Normalizar(cliente).Contains(t))
                             continue;
-                        int r = tabla.Rows.Add(pedido, Convert.ToDateTime(d["fecha_hora"]).ToString("dd/MM/yy HH:mm"),
-                            Convert.ToString(d["canal"]), Convert.ToDecimal(d["total"]).ToString("N2"), recibo,
+                        int r = tabla.Rows.Add(pedido, Convert.ToDateTime(d["fecha_hora"]).ToString("dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture),
+                            Convert.ToString(d["canal"]), Monto(Convert.ToDecimal(d["total"])), recibo,
                             cliente.Length == 0 ? "-" : cliente);
                         tabla.Rows[r].Tag = Convert.ToInt32(d["id_pedido"]);
                     }
@@ -1612,8 +1618,8 @@ namespace PROYECTO_RESTAURANTE
                 dgvDetallePedido.Rows.Add(
                     linea.Cantidad,
                     linea.Descripcion,
-                    linea.PrecioUnitario.ToString("N2"),
-                    linea.Importe.ToString("N2"));
+                    Monto(linea.PrecioUnitario),
+                    Monto(linea.Importe));
             }
 
             dgvDetallePedido.ClearSelection();
@@ -1702,7 +1708,7 @@ namespace PROYECTO_RESTAURANTE
                 vuelto = 0;
             }
 
-            txtVueltoBoleta.Text = "S/ " + vuelto.ToString("N2");
+            txtVueltoBoleta.Text = "S/ " + Monto(vuelto);
         }
 
         private void btnVistaPreviaBoleta_Click(object sender, EventArgs e)
@@ -1887,18 +1893,17 @@ namespace PROYECTO_RESTAURANTE
             // 4. TÍTULOS DE LA BOLETA DEMOSTRATIVA
             // ======================================
 
-            string tituloDoc = esFactura ? "FACTURA" : "RECIBO DE VENTA";
-            guna2HtmlLabel20.Text =
-                ModoReimpresion ? tituloDoc + " (REIMPRESIÓN)" : tituloDoc;
-            consejosBoleta.SetToolTip(guna2HtmlLabel20, esFactura ? NotaFactura : null);
+            // El documento muestra siempre el mismo título, también al reimprimir
+            // (la ventana sigue indicando «Reimprimir…»; ModoReimpresion no cambia).
+            guna2HtmlLabel20.Text = esFactura ? "FACTURA" : "RECIBO DE VENTA";
+            consejosBoleta.SetToolTip(guna2HtmlLabel20, null);
 
             guna2HtmlLabel56.Text = "¡Gracias por su compra!";
-            // Pie: el recibo termina en «¡Sabor que te encanta!»; la factura
-            // muestra su leyenda académica. El pie se ajusta a su contenido.
-            lblPrevNota.Text = esFactura ? NotaFactura : "";
-            lblPrevNota.Visible = esFactura;
-            Control ultimoPie = esFactura ? (Control)lblPrevNota : guna2HtmlLabel46;
-            guna2Panel11.Height = ultimoPie.Bottom + DisenoVentanas.Medida(this, 14);
+            // Pie: recibo y factura terminan en «¡Sabor que te encanta!» (sin
+            // leyenda final). El pie se ajusta a su contenido.
+            lblPrevNota.Text = "";
+            lblPrevNota.Visible = false;
+            guna2Panel11.Height = guna2HtmlLabel46.Bottom + DisenoVentanas.Medida(this, 14);
             lblPrevCaja.Text = "Caja: " + (cajeroRecibo ?? SesionActual.NombreCompleto ?? "");
 
             // ======================================
@@ -2108,6 +2113,17 @@ namespace PROYECTO_RESTAURANTE
 
             // 1b. Antes de pedir datos de pago: estado del pedido y permiso.
             //     (Regla de SQL: solo un pedido 'entregado' puede cobrarse.)
+            if (estadoPedido == "cobrado")
+            {
+                MessageBox.Show(
+                    "El pedido N.º " + idPedido + " ya fue cobrado.",
+                    "Validación de pago",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+
+                return false;
+            }
+
             if (estadoPedido != "entregado")
             {
                 MessageBox.Show(
@@ -2179,7 +2195,7 @@ namespace PROYECTO_RESTAURANTE
 
                     MessageBox.Show(
                         "El dinero recibido es insuficiente.\n" +
-                        "Faltan: S/ " + faltante.ToString("N2"),
+                        "Faltan: S/ " + Monto(faltante),
                         "Validación de pago",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning);
@@ -2348,10 +2364,9 @@ namespace PROYECTO_RESTAURANTE
             // Las medidas están en centésimas de pulgada.
             // Alto según el contenido (sin desperdiciar papel): base del recibo,
             // cada producto con holgura para nombres en dos líneas, y los datos
-            // opcionales (cliente, mesa, reimpresión).
+            // opcionales (cliente, mesa).
             int alto = 742 + cantidadProductos * 36
                      + (IncluirCliente() ? 60 : 0)
-                     + (ModoReimpresion ? 20 : 0)
                      + 20;
 
             documento.DefaultPageSettings.PaperSize =
@@ -2456,9 +2471,8 @@ namespace PROYECTO_RESTAURANTE
 
                 // ---------- 2. Título y número interno ----------
                 centrado("RECIBO DE VENTA", titulo, 1);
+                // Mismo número original; sin la palabra «REIMPRESIÓN».
                 centrado(numeroBoletaDemo, negrita, 1);
-                if (ModoReimpresion)
-                    centrado("REIMPRESIÓN", negrita, 1);
                 linea(6);
 
                 // ---------- 3. Datos del pedido y del cliente ----------
@@ -3293,7 +3307,28 @@ namespace PROYECTO_RESTAURANTE
             this.Close();
         }
 
+        // Un solo cobro a la vez: un segundo clic (en el botón o en su texto)
+        // que llega mientras el primero sigue en curso —por ejemplo, con la
+        // confirmación abierta— se ignora. SQL además rechaza un segundo pago.
+        private bool cobroEnCurso;
+
         private void btnRegistrarCobro_Click(object sender, EventArgs e)
+        {
+            if (cobroEnCurso)
+                return;
+
+            cobroEnCurso = true;
+            try
+            {
+                ProcesarCobro();
+            }
+            finally
+            {
+                cobroEnCurso = false;
+            }
+        }
+
+        private void ProcesarCobro()
         {
             // Validar el pedido y la forma de pago.
             if (!ValidarPago())
@@ -3395,7 +3430,7 @@ namespace PROYECTO_RESTAURANTE
                 bool conIdentificacion = IncluirCliente() && txtDNICliente.Text.Trim().Length > 0;
                 if (total > MontoIdentificacionSunat && !conIdentificacion &&
                     MessageBox.Show(
-                        "El total supera S/ " + MontoIdentificacionSunat.ToString("N2") + ".\n\n" +
+                        "El total supera S/ " + Monto(MontoIdentificacionSunat) + ".\n\n" +
                         "En una boleta electrónica SUNAT sería obligatorio registrar el DNI o CE y el nombre del cliente. " +
                         "Este recibo es un documento interno.\n\n¿Desea cobrar sin los datos del cliente?",
                         "Datos del cliente", MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
@@ -3404,7 +3439,7 @@ namespace PROYECTO_RESTAURANTE
 
                 DialogResult respuesta = MessageBox.Show(
                     "Pedido N.º " + idPedido +
-                    "\nTotal: S/ " + total.ToString("N2") +
+                    "\nTotal: S/ " + Monto(total) +
                     (esFactura
                         ? "\nDocumento: FACTURA (académica)\nRUC: " + docV + "\nRazón social: " + nomV
                         : "\nDocumento: RECIBO DE VENTA" +
@@ -3426,6 +3461,9 @@ namespace PROYECTO_RESTAURANTE
                 // 4. GUARDAR EN SQL SERVER
                 // ======================================
                 RegistrarCobroSQL(pagos);
+                // Ya cobrado: otro clic se detiene en la validación (no vuelve
+                // a preguntar ni reactiva el botón).
+                estadoPedido = "cobrado";
 
                 // Actualizar el texto del comprobante.
                 if (rbPagoMixto.Checked)
@@ -3453,7 +3491,7 @@ namespace PROYECTO_RESTAURANTE
                     "Cobro registrado correctamente.\n\n" +
                     (esFactura ? "Factura " : "Recibo ") + numeroRecibo + "\n" +
                     "Pedido N.º " + idPedido +
-                    "\nTotal: S/ " + total.ToString("N2") +
+                    "\nTotal: S/ " + Monto(total) +
                     (clienteRegistradoAlCobrar.HasValue
                         ? "\n\nCliente vinculado en Gestión de Clientes: " + txtNombreCliente.Text.Trim()
                         : "") +

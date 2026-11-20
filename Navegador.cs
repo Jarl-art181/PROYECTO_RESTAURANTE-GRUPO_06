@@ -24,10 +24,10 @@ namespace PROYECTO_RESTAURANTE
     //
     // Ahora:
     //  * Existe como máximo UNA instancia de cada módulo.
-    //  * Los módulos operativos (Inicio, Pedidos, Mesas y
-    //    Cocina) se reutilizan: se ocultan al salir y se
-    //    actualizan al volver.
-    //  * Los demás módulos se cierran y liberan al salir.
+    //  * Todos los módulos de la lista «reutilizables» (Inicio,
+    //    Pedidos, Mesas, Cocina, Empleados, Menú, Inventario,
+    //    Clientes, Promociones y Reportes) se ocultan al salir y
+    //    se actualizan al volver; se liberan al cerrar sesión.
     //  * El formulario principal nunca se cierra, porque
     //    mantiene viva la aplicación (Application.Run).
     //  * Los formularios modales (Generar_Boleta,
@@ -234,7 +234,9 @@ namespace PROYECTO_RESTAURANTE
         // Mesas o desde el aviso de reservas).
         // Siempre crea un contexto nuevo para esa mesa.
         // ------------------------------------------------------
-        public static void AbrirPedidosConMesa(Form actual, int numeroMesa)
+        // idReservaLlegada: reserva cuya llegada se confirmó (vínculo exacto
+        // del pedido); null para un pedido normal.
+        public static void AbrirPedidosConMesa(Form actual, int numeroMesa, int? idReservaLlegada = null)
         {
             if (actual == null)
                 actual = FormularioVisible();
@@ -255,7 +257,7 @@ namespace PROYECTO_RESTAURANTE
                     actual = null;
             }
 
-            FRMS_PEDIDOS nuevo = new FRMS_PEDIDOS(numeroMesa);
+            FRMS_PEDIDOS nuevo = new FRMS_PEDIDOS(numeroMesa, idReservaLlegada);
             Registrar(nuevo);
             Cambiar(actual, nuevo, false);
         }

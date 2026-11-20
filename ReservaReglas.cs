@@ -79,6 +79,9 @@ namespace PROYECTO_RESTAURANTE
         // simular otra hora sin tocar el reloj del sistema. En uso normal es 0.
         internal static TimeSpan DesfasePruebas = TimeSpan.Zero;
 
+        // Hora local del equipo más el mismo desfase (igual a DateTime.Now en uso normal).
+        public static DateTime AhoraLocal() { return DateTime.Now + DesfasePruebas; }
+
         public static void AgregarParametros(SqlCommand cmd)
         {
             cmd.Parameters.Add("@Desfase", SqlDbType.Int).Value = (int)DesfasePruebas.TotalSeconds;
@@ -165,23 +168,6 @@ namespace PROYECTO_RESTAURANTE
         // ------------------------------------------------------------------
         public static string MotivoReservaProxima(SqlConnection conexion, SqlTransaction tx, int idMesa)
         {
-            // Llegada confirmada hoy y sin pedido todavía: es el cliente de la
-            // reserva y su pedido se abre (no se bloquea por otra reserva posterior).
-            string llegada = SqlAhora + @"
-                SELECT COUNT(*) FROM dbo.RESERVA_MESA F
-                WHERE F.id_mesa = @Mesa AND F.estado = 'finalizada'
-                  AND CAST(F.fecha_hora AS DATE) = CAST(@Ahora AS DATE)
-                  AND F.fecha_hora >= DATEADD(MINUTE, -@Duracion, @Ahora)
-                  AND NOT EXISTS (SELECT 1 FROM dbo.PEDIDO P WHERE P.id_reserva = F.id_reserva);";
-            using (SqlCommand cmd = new SqlCommand(llegada, conexion, tx))
-            {
-                AgregarParametros(cmd);
-                cmd.Parameters.Add("@Duracion", SqlDbType.Int).Value = DuracionReservaMinutos;
-                cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
-                if (Convert.ToInt32(cmd.ExecuteScalar()) > 0)
-                    return null;
-            }
-
             string sql = SqlAhora + @"
                 SELECT TOP (1) R.id_reserva, R.fecha_hora, R.nombre_cliente, M.[número]
                 FROM dbo.RESERVA_MESA R" + (tx != null ? " WITH (UPDLOCK, HOLDLOCK)" : "") + @"
@@ -210,14 +196,139 @@ namespace PROYECTO_RESTAURANTE
             }
         }
 
-        // Estado que recibe una mesa al quedar sin pedido (cobro): 'reservada'
-        // si otra reserva confirmada debe tenerla apartada ahora; si no, 'libre'.
+        // ------------------------------------------------------------------
+        // LLEGADA REGISTRADA PENDIENTE DE PEDIDO (alias R = RESERVA_MESA)
+        // Tras «Confirmar llegada» la reserva queda 'finalizada' con
+        // llegada_registrada (columna persistente, SQL/RES_01). Si su mesa está
+        // libre o apartada, la mesa queda 'reservada' para ESE cliente hasta
+        // que se guarde su pedido; si la mesa sigue ocupada por el cliente
+        // anterior, el cliente queda «esperando mesa» (la mesa sigue ocupada).
+        // No vence sola (ni a los 30 minutos ni a las 2 horas): se resuelve
+        // al abrir su pedido, al reasignarla a otra mesa o al cancelarla.
+        // Las reservas antiguas 'finalizada' sin llegada_registrada no cuentan.
+        // ------------------------------------------------------------------
+        public const string SqlLlegadaPendiente = @"
+            R.estado = 'finalizada'
+            AND R.llegada_registrada IS NOT NULL
+            AND NOT EXISTS (SELECT 1 FROM dbo.PEDIDO PX WHERE PX.id_reserva = R.id_reserva)";
+
+        // ------------------------------------------------------------------
+        // MESA OCUPADA CON RESERVA PRÓXIMA (aviso del conflicto)
+        // Desde que la reserva debe apartar la mesa (11:00: inicio del día;
+        // otras horas: 15 min antes) y mientras la mesa siga ocupada:
+        //   antes de la hora  -> «Mesa ocupada · Reserva próxima 19:00»
+        //   desde la hora     -> «Mesa ocupada · Reserva en espera»
+        //   cliente registrado-> «Mesa ocupada · Cliente llegó, esperando mesa»
+        // ------------------------------------------------------------------
+        public static string TextoConflicto(DateTime fechaHora, bool llego, DateTime ahora)
+        {
+            if (llego)
+                return "Mesa ocupada · Cliente llegó, esperando mesa";
+            return ahora >= fechaHora
+                ? "Mesa ocupada · Reserva en espera"
+                : "Mesa ocupada · Reserva próxima " + fechaHora.ToString("HH:mm");
+        }
+
+        // ------------------------------------------------------------------
+        // REASIGNACIÓN DE UNA RESERVA A OTRA MESA
+        // La atención empieza ahora si el cliente ya llegó; si no, a su hora
+        // (o ahora, si ya pasó). La mesa destino debe estar libre, sin pedido
+        // activo, sin otro cliente con llegada registrada, con capacidad y sin
+        // otra reserva confirmada vigente a menos de DuracionReservaMinutos.
+        // Devuelve el motivo para el usuario, o null si la mesa sirve.
+        // Con transacción, bloquea la mesa y sus reservas (UPDLOCK, HOLDLOCK).
+        // ------------------------------------------------------------------
+        public static DateTime InicioAtencion(DateTime fechaHora, bool llego, DateTime ahora)
+        {
+            return llego || fechaHora < ahora ? ahora : fechaHora;
+        }
+
+        public static string MotivoMesaDestinoNoValida(SqlConnection conexion, SqlTransaction tx,
+            int idReserva, int idMesaDestino, int personas, DateTime inicio)
+        {
+            string bloqueo = tx != null ? " WITH (UPDLOCK, HOLDLOCK)" : "";
+            string sql = SqlAhora + @"
+                SELECT M.[número], LOWER(LTRIM(RTRIM(M.estado))), M.capacidad,
+                       (SELECT COUNT(*) FROM dbo.PEDIDO P" + bloqueo + @"
+                        WHERE P.id_mesa = M.id_mesa AND P.canal = 'salon'
+                          AND P.estado IN ('pendiente','en_preparacion','listo','entregado')),
+                       (SELECT COUNT(*) FROM dbo.RESERVA_MESA R" + bloqueo + @"
+                        WHERE R.id_mesa = M.id_mesa AND R.id_reserva <> @Reserva AND " + SqlLlegadaPendiente + @"),
+                       (SELECT TOP (1) CONVERT(VARCHAR(5), R.fecha_hora, 108) FROM dbo.RESERVA_MESA R" + bloqueo + @"
+                        WHERE R.id_mesa = M.id_mesa AND R.id_reserva <> @Reserva AND R.estado = 'confirmada'
+                          AND DATEADD(MINUTE, @Tolerancia, R.fecha_hora) > @Ahora
+                          AND ABS(DATEDIFF(MINUTE, R.fecha_hora, @Inicio)) < @DuracionConflicto
+                        ORDER BY R.fecha_hora)
+                FROM dbo.MESA M" + bloqueo + @"
+                WHERE M.id_mesa = @Mesa;";
+            using (SqlCommand cmd = new SqlCommand(sql, conexion, tx))
+            {
+                AgregarParametros(cmd);
+                cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
+                cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesaDestino;
+                cmd.Parameters.Add("@Inicio", SqlDbType.DateTime2).Value = inicio;
+                cmd.Parameters.Add("@DuracionConflicto", SqlDbType.Int).Value = DuracionReservaMinutos;
+                using (SqlDataReader rd = cmd.ExecuteReader())
+                {
+                    if (!rd.Read())
+                        return "La mesa no existe.";
+                    string mesa = "La Mesa " + rd[0];
+                    if (rd.GetString(1) != "libre")
+                        return mesa + " ya no está libre (" + rd.GetString(1) + ").";
+                    if (Convert.ToInt32(rd[2]) < personas)
+                        return mesa + " no tiene capacidad para " + personas + " personas.";
+                    if (Convert.ToInt32(rd[3]) > 0)
+                        return mesa + " tiene un pedido activo.";
+                    if (Convert.ToInt32(rd[4]) > 0)
+                        return mesa + " está apartada para otro cliente que ya llegó.";
+                    if (!rd.IsDBNull(5))
+                        return mesa + " tiene otra reserva a las " + rd.GetString(5) + " (a menos de " +
+                               (DuracionReservaMinutos / 60) + " horas).";
+                    return null;
+                }
+            }
+        }
+
+        // «Ahora» del servidor (con el desfase del reloj de pruebas), para la interfaz.
+        public static DateTime AhoraServidor()
+        {
+            using (SqlConnection conexion = new SqlConnection(BaseDatos.CadenaConexion))
+            {
+                conexion.Open();
+                return AhoraServidor(conexion, null);
+            }
+        }
+
+        // ¿La mesa (alias M) debe figurar 'reservada' ahora? Por una reserva
+        // confirmada que ya debe apartarla, o por una llegada pendiente de pedido.
+        public const string SqlMesaDebeEstarReservada = @"
+            EXISTS (SELECT 1 FROM dbo.RESERVA_MESA R
+                    WHERE R.id_mesa = M.id_mesa
+                      AND ((R.estado = 'confirmada' AND " + SqlDebeEstarApartada + @")
+                           OR (" + SqlLlegadaPendiente + @")))";
+
+        // Estado que recibe una mesa al quedar sin pedido (cobro), en la misma
+        // transacción: 'reservada' si debe seguir apartada; si no, 'libre'.
         // Alias M = MESA; requiere SqlAhora y AgregarParametros.
         public const string SqlEstadoAlLiberar = @"
-            CASE WHEN EXISTS (SELECT 1 FROM dbo.RESERVA_MESA R
-                              WHERE R.id_mesa = M.id_mesa AND R.estado = 'confirmada'
-                                AND " + SqlDebeEstarApartada + @")
+            CASE WHEN " + SqlMesaDebeEstarReservada + @"
                  THEN 'reservada' ELSE 'libre' END";
+
+        // ¿La reserva tiene su llegada confirmada en ESTA mesa y aún no tiene
+        // pedido? (identidad y estado; con transacción, bloquea la reserva).
+        public static bool LlegadaPendienteValida(SqlConnection conexion, SqlTransaction tx, int idReserva, int idMesa)
+        {
+            string sql = SqlAhora + @"
+                SELECT COUNT(*) FROM dbo.RESERVA_MESA R" + (tx != null ? " WITH (UPDLOCK, HOLDLOCK)" : "") + @"
+                WHERE R.id_reserva = @Reserva AND R.id_mesa = @Mesa AND " + SqlLlegadaPendiente + ";";
+            using (SqlCommand cmd = new SqlCommand(sql, conexion, tx))
+            {
+                AgregarParametros(cmd);
+                cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
+                cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
+                return Convert.ToInt32(cmd.ExecuteScalar()) == 1;
+            }
+        }
 
         // Texto para el usuario: cuándo se apartará la mesa.
         public static string TextoApartado(DateTime fechaHora)

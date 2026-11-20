@@ -55,7 +55,7 @@ namespace PROYECTO_RESTAURANTE
                 return;
 
             guna2HtmlLabel4.Text =
-                "Registro de trabajadores, cargos, turnos y estado laboral";
+                "Registro de trabajadores, cargos y estado laboral · " + Turnos.HorarioFlexible;
 
             ConfigurarTabla();
             ConfigurarFiltros();
@@ -108,11 +108,18 @@ namespace PROYECTO_RESTAURANTE
             // Columnas cortas con ancho exacto (medido con la letra real);
             // el nombre ocupa el resto y pasa a dos líneas si es largo.
             EstiloTablas.ColumnaFija(Column_codi, 62, EstiloTablas.Centro);
-            EstiloTablas.Columna(Column_nombres, 100, 156, EstiloTablas.Izquierda, true);
+            // (Mínimo 132: cede a «Horario laboral» los 24 px que esta gana, para
+            // que la suma no cambie y DNI/Teléfono conserven su ancho.)
+            EstiloTablas.Columna(Column_nombres, 100, 132, EstiloTablas.Izquierda, true);
             EstiloTablas.ColumnaFija(Column1_DNI, 80, EstiloTablas.Centro);
             EstiloTablas.ColumnaFija(Column_cargo, 108, EstiloTablas.Izquierda);
             EstiloTablas.ColumnaFija(Column_telefono, 88, EstiloTablas.Centro);
-            EstiloTablas.ColumnaFija(Column_turno, 82, EstiloTablas.Izquierda);
+            // Horario laboral (antes «Turno»): encabezado y texto en dos líneas,
+            // para no quitar ancho a DNI ni Teléfono.
+            Column_turno.HeaderText = "HORARIO" + Environment.NewLine + "LABORAL";
+            Column_turno.HeaderCell.Style.WrapMode = DataGridViewTriState.True;
+            EstiloTablas.ColumnaFija(Column_turno, 106, EstiloTablas.Izquierda);
+            Column_turno.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
             EstiloTablas.ColumnaFija(Column_Estado, 68, EstiloTablas.Izquierda);
             EstiloTablas.ColumnaFija(ColumnAccion, 86, EstiloTablas.Centro);
 

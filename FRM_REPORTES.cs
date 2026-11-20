@@ -534,7 +534,7 @@ namespace PROYECTO_RESTAURANTE
                 v.Controls.Add(cab);
                 EstiloTablas.Configurar(g, 34, 28);
                 g.ThemeStyle.HeaderStyle.BackColor = Dorado;
-                v.Shown += (s, e) => { foreach (DataGridViewColumn col in g.Columns) if (col.ValueType == typeof(decimal)) col.DefaultCellStyle.Format = "N2"; };
+                v.Shown += (s, e) => { foreach (DataGridViewColumn col in g.Columns) if (col.ValueType == typeof(decimal)) { col.DefaultCellStyle.Format = "N2"; col.DefaultCellStyle.FormatProvider = Peru; } };
                 v.ShowDialog(this);
             }
         }

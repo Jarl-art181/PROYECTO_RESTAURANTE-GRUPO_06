@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -47,9 +48,22 @@ namespace PROYECTO_RESTAURANTE
             cmbCargo.Items.Clear();
             cmbCargo.Items.AddRange(Cargos.Todos);
 
-            cmbTurno.Items.Clear();
-            foreach (string turno in Turnos.Valores)
-                cmbTurno.Items.Add(Turnos.Mostrar(turno));
+            // Un solo horario flexible (11:00–23:00): no se elige turno. En el
+            // lugar de la lista se muestra el horario (texto fijo, sin selección).
+            cmbTurno.Visible = false;
+            cmbTurno.TabStop = false;
+            lblTurno.Text = "Horario laboral";
+            Label horario = new Label
+            {
+                AutoSize = false,
+                Bounds = cmbTurno.Bounds,
+                BackColor = Color.Transparent,
+                ForeColor = Color.Black,
+                Font = new Font("Segoe UI", 9F),
+                TextAlign = ContentAlignment.MiddleLeft,
+                Text = Turnos.HorarioFlexible.Replace(": ", ":\n")
+            };
+            cmbTurno.Parent.Controls.Add(horario);
 
             cmbEstado.Items.Clear();
             cmbEstado.Items.Add("Activo");
@@ -133,8 +147,6 @@ namespace PROYECTO_RESTAURANTE
 
             cmbCargo.SelectedItem = Cargos.Todos.Contains(e.Cargo) ? e.Cargo : null;
 
-            int turno = Array.IndexOf(Turnos.Valores, e.Turno);
-            cmbTurno.SelectedIndex = turno;
 
             cmbEstado.SelectedIndex = e.Estado == "inactivo" ? 1 : 0;
             SeleccionarSucursal(e.IdSucursal);
@@ -242,7 +254,8 @@ namespace PROYECTO_RESTAURANTE
                 Apellidos = txtApellidos.Text,
                 Telefono = txtTelefono.Text,
                 Cargo = cmbCargo.SelectedItem as string,
-                Turno = cmbTurno.SelectedIndex >= 0 ? Turnos.Valores[cmbTurno.SelectedIndex] : null,
+                // Sin turno: nuevo = NULL; al editar se conserva el valor histórico.
+                Turno = original != null ? original.Turno : null,
                 Estado = cmbEstado.SelectedIndex == 1 ? "inactivo" : (cmbEstado.SelectedIndex == 0 ? "activo" : null),
                 IdSucursal = cmbSucursal.SelectedItem is SucursalInfo
                     ? ((SucursalInfo)cmbSucursal.SelectedItem).IdSucursal : 0

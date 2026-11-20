@@ -46,15 +46,38 @@ namespace PROYECTO_RESTAURANTE
         }
     }
 
+    // ------------------------------------------------------------------
+    // HORARIO LABORAL: un solo horario flexible, igual al horario de
+    // atención del restaurante (11:00 a 23:00, ReservaReglas). No hay turnos
+    // ni horas de entrada/salida por empleado.
+    // EMPLEADO.turno y CAJERO.turno se conservan en SQL solo por los
+    // registros históricos: los empleados nuevos se guardan con NULL (las
+    // reglas CK_EMPLEADO_TURNO y CK_CAJERO_TURNO lo admiten) y al editar se
+    // conserva el valor que ya tenían.
+    // ------------------------------------------------------------------
     internal static class Turnos
     {
-        // Valor en SQL -> texto visible.
+        // Valores históricos que admite SQL Server (ya no se ofrecen).
         public static readonly string[] Valores = { "mañana", "tarde", "noche" };
 
-        public static string Mostrar(string valor)
+        private static readonly System.Globalization.CultureInfo Peru =
+            System.Globalization.CultureInfo.GetCultureInfo("es-PE");
+
+        // «Horario flexible: 11:00 a. m. – 11:00 p. m.»
+        public static string HorarioFlexible
         {
-            if (string.IsNullOrEmpty(valor)) return "Sin asignar";
-            return char.ToUpper(valor[0]) + valor.Substring(1);
+            get
+            {
+                return "Horario flexible: " + DateTime.Today.Add(ReservaReglas.HoraApertura).ToString("h:mm tt", Peru) +
+                       " – " + DateTime.Today.Add(ReservaReglas.HoraCierre).ToString("h:mm tt", Peru);
+            }
+        }
+
+        // «Flexible (11:00–23:00)» para la tabla y el detalle de Empleados.
+        public static string Mostrar(string valorHistorico)
+        {
+            return "Flexible (" + DateTime.Today.Add(ReservaReglas.HoraApertura).ToString("HH:mm") +
+                   "–" + DateTime.Today.Add(ReservaReglas.HoraCierre).ToString("HH:mm") + ")";
         }
     }
 
@@ -253,8 +276,9 @@ namespace PROYECTO_RESTAURANTE
             if (!Cargos.Todos.Contains(e.Cargo))
                 throw new ReglaNegocioException("Seleccione el cargo.");
 
-            if (!Turnos.Valores.Contains(e.Turno))
-                throw new ReglaNegocioException("Seleccione el turno.");
+            // Sin turno (horario flexible). Solo se acepta un valor histórico válido.
+            if (e.Turno != null && !Turnos.Valores.Contains(e.Turno))
+                throw new ReglaNegocioException("El turno histórico guardado del empleado no es válido.");
 
             if (e.Estado != "activo" && e.Estado != "inactivo")
                 throw new ReglaNegocioException("Seleccione el estado laboral.");
@@ -675,13 +699,13 @@ namespace PROYECTO_RESTAURANTE
                 string.IsNullOrEmpty(e.Telefono) ? (object)DBNull.Value : e.Telefono;
             cmd.Parameters.Add("@Estado", SqlDbType.VarChar, 20).Value = e.Estado;
             cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = e.IdSucursal;
-            cmd.Parameters.Add("@Turno", SqlDbType.VarChar, 20).Value = e.Turno;
+            cmd.Parameters.Add("@Turno", SqlDbType.VarChar, 20).Value = (object)e.Turno ?? DBNull.Value;
         }
 
         private static void ParametrosCargo(SqlCommand cmd, int id, EmpleadoInfo e)
         {
             cmd.Parameters.Add("@Id", SqlDbType.Int).Value = id;
-            cmd.Parameters.Add("@Turno", SqlDbType.VarChar, 20).Value = e.Turno;
+            cmd.Parameters.Add("@Turno", SqlDbType.VarChar, 20).Value = (object)e.Turno ?? DBNull.Value;
             cmd.Parameters.Add("@Area", SqlDbType.VarChar, 100).Value = (object)e.AreaAsignada ?? DBNull.Value;
             cmd.Parameters.Add("@Certificacion", SqlDbType.VarChar, 100).Value = (object)e.Certificacion ?? DBNull.Value;
             cmd.Parameters.Add("@Zona", SqlDbType.VarChar, 100).Value = (object)e.ZonaReparto ?? DBNull.Value;

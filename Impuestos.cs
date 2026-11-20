@@ -17,6 +17,33 @@ namespace PROYECTO_RESTAURANTE
     //                          (18 %) al reimprimirse, porque la base de
     //                          datos no guarda el IGV de cada recibo.
     // ==========================================================
+    // ==========================================================
+    // FORMATO DE PANTALLA Y DOCUMENTOS (solo presentación)
+    // ----------------------------------------------------------
+    // Un único estilo en Inicio, Pedidos, Cobro, Recibos, Facturas y
+    // Reportes, el de Perú: S/ 1,234.50 · 19/11/2026 · 19/11/2026 14:05.
+    // No interviene en cálculos ni en lo que se escribe en los campos.
+    // ==========================================================
+    internal static class Formato
+    {
+        public static readonly CultureInfo Peru = CultureInfo.GetCultureInfo("es-PE");
+
+        public static string Monto(decimal v) { return v.ToString("N2", Peru); }
+        public static string Soles(decimal v) { return "S/ " + Monto(v); }
+        public static string Porcentaje(decimal v) { return v.ToString("0.0", Peru) + "%"; }
+        public static string Fecha(DateTime f) { return f.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture); }
+        public static string FechaHora(DateTime f) { return f.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture); }
+        public static string FechaHoraCorta(DateTime f) { return f.ToString("dd/MM HH:mm", CultureInfo.InvariantCulture); }
+
+        // Encabezado de las ventanas: «Jue. 19 Nov 2026».
+        public static string FechaEncabezado(DateTime f)
+        {
+            string[] dias = { "Dom.", "Lun.", "Mar.", "Mié.", "Jue.", "Vier.", "Sáb." };
+            string[] meses = { "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" };
+            return dias[(int)f.DayOfWeek] + " " + f.Day.ToString("00") + " " + meses[f.Month - 1] + " " + f.Year;
+        }
+    }
+
     internal static class Impuestos
     {
         public const decimal TasaAnterior = 18m;

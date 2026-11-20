@@ -401,7 +401,7 @@ namespace PROYECTO_RESTAURANTE
                 foreach (DataGridViewColumn col in g.Columns)
                     if (col.ValueType == typeof(decimal) || col.ValueType == typeof(int))
                     {
-                        if (col.ValueType == typeof(decimal)) col.DefaultCellStyle.Format = "N2";
+                        if (col.ValueType == typeof(decimal)) { col.DefaultCellStyle.Format = "N2"; col.DefaultCellStyle.FormatProvider = Peru; }
                         col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                     }
             };

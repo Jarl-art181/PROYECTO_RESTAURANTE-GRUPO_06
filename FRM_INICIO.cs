@@ -370,7 +370,7 @@ namespace PROYECTO_RESTAURANTE
                                 cantidad.ToString();
 
                             porcentajes[posicion].Text =
-                                porcentaje.ToString("0.0") + "%";
+                                porcentaje.ToString("0.0", Formato.Peru) + "%";
 
                             int valor = Convert.ToInt32(
                                 Math.Round(porcentaje));
@@ -472,7 +472,7 @@ namespace PROYECTO_RESTAURANTE
                                     lector["TotalVentas"]);
 
                             lblVentasHoy.Text =
-                                "S/ " + ventas.ToString("N2");
+                                Formato.Soles(ventas);
 
                             guna2HtmlLabel3.Text =
                                 "VENTAS TOTALES";
@@ -835,7 +835,7 @@ namespace PROYECTO_RESTAURANTE
                                 numero,
                                 mesa,
                                 estado,
-                                "S/ " + total.ToString("N2"));
+                                Formato.Soles(total));
 
                             // ==================================
                             // 4. COLORES SEGÚN EL ESTADO
@@ -1181,13 +1181,13 @@ namespace PROYECTO_RESTAURANTE
                 // =====================================
 
                 lblPorcentajeSalon.Text =
-                    porcentajeSalon.ToString("0.0") + "%";
+                    porcentajeSalon.ToString("0.0", Formato.Peru) + "%";
 
                 lblPorcentajeDelivery.Text =
-                    porcentajeDelivery.ToString("0.0") + "%";
+                    porcentajeDelivery.ToString("0.0", Formato.Peru) + "%";
 
                 lblPorcentajeRecojo.Text =
-                    porcentajeRecojo.ToString("0.0") + "%";
+                    porcentajeRecojo.ToString("0.0", Formato.Peru) + "%";
 
                 lblPorcentajeTotal.Text =
                     total > 0 ? "100%" : "0%";

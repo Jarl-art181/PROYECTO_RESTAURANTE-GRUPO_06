@@ -112,11 +112,22 @@ namespace PROYECTO_RESTAURANTE
             CargarPedidosSQL();
         }
 
+        // Espera del pedido en palabras: «Recién recibido», «Hace 25 min»,
+        // «Hace 2 h 05 min» o, si lleva un día o más, «Hace 13 días 8 h».
+        internal static string TiempoTranscurrido(TimeSpan espera)
+        {
+            int minutos = Math.Max(0, (int)espera.TotalMinutes);
+            if (minutos < 1) return "Recién recibido";
+            if (minutos < 60) return "Hace " + minutos + " min";
+            if (minutos < 24 * 60) return "Hace " + (minutos / 60) + " h " + (minutos % 60).ToString("00") + " min";
+            int dias = minutos / (24 * 60), horas = (minutos / 60) % 24;
+            return "Hace " + dias + (dias == 1 ? " día" : " días") + (horas > 0 ? " " + horas + " h" : "");
+        }
+
         private void ActualizarFechaYHora()
         {
             lblHora.Text = DateTime.Now.ToString("HH:mm:ss");
-            lblFecha.Text = DateTime.Now.ToString("ddd dd MMM yyyy",
-                new System.Globalization.CultureInfo("es-PE"));
+            lblFecha.Text = Formato.FechaEncabezado(DateTime.Now);   // igual que las demás ventanas
         }
 
         // Los tres contenedores YA existen en tu formulario.
@@ -496,9 +507,8 @@ namespace PROYECTO_RESTAURANTE
             tiempo.AutoSize = false;
             tiempo.Location = new Point(M(12), M(37));
             tiempo.Size = new Size(ancho - M(24), M(21));
-            int minutos = Math.Max(0, (int)(horaServidor - pedido.FechaHora).TotalMinutes);
             tiempo.Text = "Recibido " + pedido.FechaHora.ToString("dd/MM HH:mm") +
-                "  ·  Hace " + minutos + " min";
+                "  ·  " + TiempoTranscurrido(horaServidor - pedido.FechaHora);
             tarjeta.Controls.Add(tiempo);
 
             Label productos = new Label();

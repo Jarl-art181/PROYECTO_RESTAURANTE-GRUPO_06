@@ -25,7 +25,8 @@ namespace PROYECTO_RESTAURANTE
     // Cada documento conserva sus propios datos: cambiar de uno a otro
     // no mezcla un DNI con un RUC y, al volver, se recuperan.
     //
-    // La factura es ACADÉMICA (serie FA01): no es un comprobante
+    // La factura es ACADÉMICA (serie FA01; en el A4 lo indican el recuadro
+    // «Documento académico» y la nota del IGV del curso): no es un comprobante
     // electrónico autorizado por SUNAT. Se guarda en dbo.COMPROBANTE
     // con tipo 'F' en la MISMA transacción del cobro; verla, imprimirla
     // o guardarla en PDF solo lee los datos (no escribe en SQL).
@@ -33,7 +34,6 @@ namespace PROYECTO_RESTAURANTE
     public partial class Generar_Boleta
     {
         private const string SerieFactura = "FA01";
-        private const string NotaFactura = "Factura académica · No es comprobante electrónico SUNAT";
 
         private bool esFactura;
         private Guna2Button btnDocRecibo, btnDocFactura;
@@ -474,7 +474,7 @@ namespace PROYECTO_RESTAURANTE
                 };
                 cabecera();
 
-                const float altoTotales = 250f;
+                const float altoTotales = 230f;
                 float limite = alto - 70f;
                 bool alterna = false;
                 while (fila < productos.Count)
@@ -529,8 +529,6 @@ namespace PROYECTO_RESTAURANTE
                     g.DrawString("Precios con IGV incluido. IGV calculado con la tasa académica del " +
                         tasaIgv.ToString("0.##", CultureInfo.InvariantCulture) + " % (configuración del curso, no validación tributaria).",
                         fPequeno, Brushes.Black, new RectangleF(m, y, util, 30));
-                    y += 30f;
-                    g.DrawString(NotaFactura, fNegrita, Brushes.Black, new RectangleF(m, y, util, 20), centro);
                 }
 
                 g.DrawString("Página " + pagina, fPequeno, Brushes.Gray, new RectangleF(m, alto - 45f, util, 16), derecha);
@@ -575,7 +573,7 @@ namespace PROYECTO_RESTAURANTE
                 Label aviso = new Label
                 {
                     AutoSize = false, BackColor = Color.Transparent, Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                    Text = FacturaEmitida ? NotaFactura : "Vista previa: la factura se emite al registrar el cobro.",
+                    Text = FacturaEmitida ? "" : "Vista previa: la factura se emite al registrar el cobro.",
                     TextAlign = ContentAlignment.MiddleLeft
                 };
                 barra.Controls.AddRange(new Control[] { aviso, imprimir, pdf, cerrar });

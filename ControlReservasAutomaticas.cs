@@ -64,6 +64,7 @@ namespace PROYECTO_RESTAURANTE
             public string Telefono;
             public int Personas;
             public string Observacion;
+            public bool Llego;                   // llegada registrada (finalizada sin pedido)
         }
 
         // ======================================================
@@ -260,9 +261,10 @@ namespace PROYECTO_RESTAURANTE
 
                     if (respuesta == DialogResult.Yes)
                     {
+                        bool enEspera;
                         try
                         {
-                            ConfirmarLlegada(aviso.IdReserva);
+                            enEspera = ConfirmarLlegada(aviso.IdReserva);
                         }
                         catch (Exception ex)
                         {
@@ -271,10 +273,17 @@ namespace PROYECTO_RESTAURANTE
                                 "No se pudo confirmar la llegada:\n" + ex.Message);
                             continue;
                         }
+                        if (enEspera)
+                        {
+                            MessageBox.Show("La Mesa " + aviso.NumeroMesa + " sigue ocupada: el cliente queda «esperando mesa».\n" +
+                                "Desde Gestión de Mesas puede reasignarlo a otra mesa libre.",
+                                "Confirmación de llegada", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            continue;
+                        }
 
                         try
                         {
-                            AbrirPedidosEnSalon(aviso.NumeroMesa);
+                            AbrirPedidosEnSalon(aviso.NumeroMesa, aviso.IdReserva);
                         }
                         catch (Exception ex)
                         {
@@ -347,8 +356,9 @@ namespace PROYECTO_RESTAURANTE
         // SINCRONIZACIÓN MESA <-> RESERVAS (regla única de ReservaReglas)
         // ------------------------------------------------------
         // 1. Aparta ('reservada') la mesa libre, sin pedido activo, cuya
-        //    reserva confirmada ya debe estar apartada: la de las 11:00
-        //    desde el inicio de ese día; las demás 15 minutos antes.
+        //    reserva confirmada ya debe estar apartada (la de las 11:00
+        //    desde el inicio de ese día; las demás 15 minutos antes) o
+        //    cuyo cliente ya llegó y aún no tiene pedido.
         // 2. Devuelve a 'libre' la mesa 'reservada' que no tiene ninguna
         //    reserva que deba apartarla ahora ni pedido activo (por ejemplo,
         //    apartada con la regla anterior de 60 minutos o con su reserva
@@ -365,10 +375,7 @@ namespace PROYECTO_RESTAURANTE
                 FROM dbo.MESA M WITH (UPDLOCK, HOLDLOCK)
                 WHERE M.id_sucursal = @Sucursal
                   AND LOWER(LTRIM(RTRIM(M.estado))) = 'libre'
-                  AND EXISTS (
-                      SELECT 1 FROM dbo.RESERVA_MESA R
-                      WHERE R.id_mesa = M.id_mesa AND R.estado = 'confirmada'
-                        AND " + ReservaReglas.SqlDebeEstarApartada + @")
+                  AND " + ReservaReglas.SqlMesaDebeEstarReservada + @"
                   AND NOT EXISTS (
                       SELECT 1 FROM dbo.PEDIDO P
                       WHERE P.id_mesa = M.id_mesa AND P.canal = 'salon'
@@ -379,10 +386,7 @@ namespace PROYECTO_RESTAURANTE
                 FROM dbo.MESA M WITH (UPDLOCK, HOLDLOCK)
                 WHERE M.id_sucursal = @Sucursal
                   AND LOWER(LTRIM(RTRIM(M.estado))) = 'reservada'
-                  AND NOT EXISTS (
-                      SELECT 1 FROM dbo.RESERVA_MESA R
-                      WHERE R.id_mesa = M.id_mesa AND R.estado = 'confirmada'
-                        AND " + ReservaReglas.SqlDebeEstarApartada + @")
+                  AND NOT " + ReservaReglas.SqlMesaDebeEstarReservada + @"
                   AND NOT EXISTS (
                       SELECT 1 FROM dbo.PEDIDO P
                       WHERE P.id_mesa = M.id_mesa AND P.canal = 'salon'
@@ -596,8 +600,9 @@ namespace PROYECTO_RESTAURANTE
         {
             using (SqlCommand cmd = Comando(ReservaReglas.SqlAhora + @"
                 SELECT COUNT(*) FROM dbo.RESERVA_MESA R WITH (UPDLOCK, HOLDLOCK)
-                WHERE R.id_mesa = @Mesa AND R.id_reserva <> @Reserva AND R.estado = 'confirmada'
-                  AND " + ReservaReglas.SqlDebeEstarApartada + ";", conexion, tx))
+                WHERE R.id_mesa = @Mesa AND R.id_reserva <> @Reserva
+                  AND ((R.estado = 'confirmada' AND " + ReservaReglas.SqlDebeEstarApartada + @")
+                       OR (" + ReservaReglas.SqlLlegadaPendiente + "));", conexion, tx))
             {
                 ReservaReglas.AgregarParametros(cmd);
                 cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
@@ -657,8 +662,12 @@ namespace PROYECTO_RESTAURANTE
         }
 
         // Puede llamarse desde la pregunta de los 15 min o desde Abrir pedido.
-        public static void ConfirmarLlegada(int idReserva)
+        // Registra la llegada del cliente de la reserva. Devuelve true si la mesa
+        // sigue ocupada por el cliente anterior: el cliente queda «esperando
+        // mesa» (la mesa no cambia y la espera no vence a los 30 minutos).
+        public static bool ConfirmarLlegada(int idReserva)
         {
+            bool enEspera = false;
             if (!SesionActual.Iniciada || !Permisos.AtiendeReservas(SesionActual.Cargo))
                 throw new Exception("Solo un Administrador, Cajero o Mesero puede confirmar la llegada de una reserva.");
 
@@ -714,11 +723,24 @@ namespace PROYECTO_RESTAURANTE
                                 ": la llegada se confirma ese día.");
                         if (ahoraServidor >= fechaHora.AddMinutes(ToleranciaMinutos))
                             throw new Exception("La reserva superó los " + ToleranciaMinutos + " minutos de tolerancia.");
-                        if (estadoMesa == "ocupada" || TienePedidoActivo(conexion, tx, idMesa))
-                            throw new Exception("La mesa todavía está ocupada por otro cliente: aún no está disponible.\n" +
-                                "La reserva sigue confirmada; confirme la llegada cuando la mesa quede libre.");
-                        if (estadoMesa != "reservada" && estadoMesa != "libre")
+                        if (estadoMesa != "reservada" && estadoMesa != "libre" && estadoMesa != "ocupada")
                             throw new Exception("La mesa está " + estadoMesa + ": no se puede confirmar la llegada.");
+                        // Mesa ocupada por el cliente anterior: se registra la llegada y el
+                        // cliente queda en espera (no se toca la mesa ni el pedido activo).
+                        enEspera = estadoMesa == "ocupada" || TienePedidoActivo(conexion, tx, idMesa);
+                        // Un solo cliente con llegada registrada por mesa.
+                        using (SqlCommand cmd = Comando(ReservaReglas.SqlAhora + @"
+                            SELECT TOP (1) R.id_reserva FROM dbo.RESERVA_MESA R WITH (UPDLOCK, HOLDLOCK)
+                            WHERE R.id_mesa = @Mesa AND R.id_reserva <> @Reserva AND " + ReservaReglas.SqlLlegadaPendiente + ";", conexion, tx))
+                        {
+                            ReservaReglas.AgregarParametros(cmd);
+                            cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
+                            cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
+                            object otra = cmd.ExecuteScalar();
+                            if (otra != null && otra != DBNull.Value)
+                                throw new Exception("La mesa ya tiene otro cliente con llegada registrada (reserva N.º " + otra + ").\n" +
+                                    "Reasigne una de las reservas a otra mesa libre.");
+                        }
                         // Si otra reserva de la mesa es anterior y sigue vigente, la mesa es suya.
                         using (SqlCommand cmd = Comando(@"
                             SELECT TOP (1) id_reserva, fecha_hora FROM dbo.RESERVA_MESA WITH (UPDLOCK, HOLDLOCK)
@@ -740,22 +762,24 @@ namespace PROYECTO_RESTAURANTE
                         }
 
                         using (SqlCommand cmd = Comando(@"
-                            UPDATE dbo.RESERVA_MESA SET estado = 'finalizada'
+                            UPDATE dbo.RESERVA_MESA SET estado = 'finalizada', llegada_registrada = @Ahora
                             WHERE id_reserva = @Reserva AND estado = 'confirmada';", conexion, tx))
                         {
                             cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
+                            cmd.Parameters.Add("@Ahora", SqlDbType.DateTime2).Value = ahoraServidor;
                             if (cmd.ExecuteNonQuery() != 1) throw new Exception("No se pudo finalizar la reserva.");
                         }
 
-                        // La mesa queda libre para abrir el pedido del comensal.
-                        if (estadoMesa == "reservada")
+                        // La mesa queda 'reservada' para ESTE cliente hasta que se guarde
+                        // su pedido (si se cierra Pedidos sin guardar, nadie más la toma).
+                        if (estadoMesa == "libre")
                         {
                             using (SqlCommand cmd = Comando(@"
-                                UPDATE dbo.MESA SET estado = 'libre'
-                                WHERE id_mesa = @Mesa AND estado = 'reservada';", conexion, tx))
+                                UPDATE dbo.MESA SET estado = 'reservada'
+                                WHERE id_mesa = @Mesa AND estado = 'libre';", conexion, tx))
                             {
                                 cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
-                                if (cmd.ExecuteNonQuery() != 1) throw new Exception("No se pudo preparar la mesa para el pedido.");
+                                if (cmd.ExecuteNonQuery() != 1) throw new Exception("No se pudo apartar la mesa para el cliente.");
                             }
                         }
 
@@ -768,11 +792,13 @@ namespace PROYECTO_RESTAURANTE
                     }
                 }
             }
-            Registro.Info("Reservas", "Llegada confirmada de la reserva " + idReserva + ".");
+            Registro.Info("Reservas", "Llegada confirmada de la reserva " + idReserva +
+                (enEspera ? " (cliente esperando mesa: la mesa sigue ocupada)." : "."));
             NotificarMesasActualizadas();
+            return enEspera;
         }
 
-        public static void AbrirPedidosEnSalon(int numeroMesa)
+        public static void AbrirPedidosEnSalon(int numeroMesa, int? idReservaLlegada = null)
         {
             if (numeroMesa < 1 || numeroMesa > 10)
             {
@@ -787,7 +813,7 @@ namespace PROYECTO_RESTAURANTE
 
             // Abrir Pedidos enviando el número de mesa, sin dejar
             // instancias anteriores ocultas en memoria.
-            Navegador.AbrirPedidosConMesa(ventanaActual, numeroMesa);
+            Navegador.AbrirPedidosConMesa(ventanaActual, numeroMesa, idReservaLlegada);
         }
 
         // Reserva confirmada de HOY (aún en su tolerancia) más próxima de la
@@ -827,6 +853,317 @@ namespace PROYECTO_RESTAURANTE
                     };
                 }
             }
+        }
+
+        // Llegada confirmada de la mesa que aún no tiene pedido (para volver a
+        // abrir Pedidos con su id_reserva o anularla). null si no hay.
+        internal static ReservaVigente ObtenerLlegadaPendiente(int numeroMesa)
+        {
+            using (SqlConnection conexion = new SqlConnection(CadenaConexion))
+            using (SqlCommand cmd = new SqlCommand(ReservaReglas.SqlAhora + @"
+                SELECT TOP (1) R.id_reserva, M.[número], R.nombre_cliente, R.fecha_hora,
+                       ISNULL(R.telefono, ''), R.personas, ISNULL(R.observacion, '')
+                FROM dbo.RESERVA_MESA R
+                INNER JOIN dbo.MESA M ON M.id_mesa = R.id_mesa
+                WHERE M.id_sucursal = @Sucursal AND M.[número] = @Numero
+                  AND " + ReservaReglas.SqlLlegadaPendiente + @"
+                ORDER BY R.fecha_hora DESC, R.id_reserva DESC;", conexion))
+            {
+                cmd.CommandTimeout = TiempoComando;
+                cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
+                cmd.Parameters.Add("@Numero", SqlDbType.Int).Value = numeroMesa;
+                ReservaReglas.AgregarParametros(cmd);
+                conexion.Open();
+                using (SqlDataReader rd = cmd.ExecuteReader())
+                    return rd.Read() ? LeerReserva(rd) : null;
+            }
+        }
+
+        // Reserva confirmada por su id (para cancelarla desde la tabla). null si
+        // ya no está confirmada.
+        // Reserva vigente por su id: confirmada, o con llegada registrada y sin
+        // pedido (Llego = true). null si ya no está vigente.
+        internal static ReservaVigente ObtenerReservaVigentePorId(int idReserva)
+        {
+            using (SqlConnection conexion = new SqlConnection(CadenaConexion))
+            using (SqlCommand cmd = new SqlCommand(ReservaReglas.SqlAhora + @"
+                SELECT R.id_reserva, M.[número], R.nombre_cliente, R.fecha_hora,
+                       ISNULL(R.telefono, ''), R.personas, ISNULL(R.observacion, ''),
+                       CASE WHEN R.estado = 'finalizada' THEN 1 ELSE 0 END
+                FROM dbo.RESERVA_MESA R
+                INNER JOIN dbo.MESA M ON M.id_mesa = R.id_mesa
+                WHERE R.id_reserva = @Reserva AND M.id_sucursal = @Sucursal
+                  AND (R.estado = 'confirmada' OR (" + ReservaReglas.SqlLlegadaPendiente + "));", conexion))
+            {
+                cmd.CommandTimeout = TiempoComando;
+                cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
+                cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
+                ReservaReglas.AgregarParametros(cmd);
+                conexion.Open();
+                using (SqlDataReader rd = cmd.ExecuteReader())
+                {
+                    if (!rd.Read()) return null;
+                    ReservaVigente r = LeerReserva(rd);
+                    r.Llego = Convert.ToInt32(rd[7]) == 1;
+                    return r;
+                }
+            }
+        }
+
+        // Mesa ocupada: reserva que choca con ella (cliente que ya llegó y
+        // espera, o confirmada que ya debe apartarla). null si no hay conflicto.
+        internal static ReservaVigente ObtenerConflictoMesaOcupada(int numeroMesa)
+        {
+            using (SqlConnection conexion = new SqlConnection(CadenaConexion))
+            using (SqlCommand cmd = new SqlCommand(ReservaReglas.SqlAhora + @"
+                SELECT TOP (1) R.id_reserva, M.[número], R.nombre_cliente, R.fecha_hora,
+                       ISNULL(R.telefono, ''), R.personas, ISNULL(R.observacion, ''),
+                       CASE WHEN R.estado = 'finalizada' THEN 1 ELSE 0 END
+                FROM dbo.RESERVA_MESA R
+                INNER JOIN dbo.MESA M ON M.id_mesa = R.id_mesa
+                WHERE M.id_sucursal = @Sucursal AND M.[número] = @Numero
+                  AND ((" + ReservaReglas.SqlLlegadaPendiente + @")
+                       OR (R.estado = 'confirmada' AND " + ReservaReglas.SqlDebeEstarApartada + @"))
+                ORDER BY CASE WHEN R.estado = 'finalizada' THEN 0 ELSE 1 END, R.fecha_hora;", conexion))
+            {
+                cmd.CommandTimeout = TiempoComando;
+                cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
+                cmd.Parameters.Add("@Numero", SqlDbType.Int).Value = numeroMesa;
+                ReservaReglas.AgregarParametros(cmd);
+                conexion.Open();
+                using (SqlDataReader rd = cmd.ExecuteReader())
+                {
+                    if (!rd.Read()) return null;
+                    ReservaVigente r = LeerReserva(rd);
+                    r.Llego = Convert.ToInt32(rd[7]) == 1;
+                    return r;
+                }
+            }
+        }
+
+        // Mesas libres a las que se puede trasladar la reserva (consulta previa;
+        // la validación definitiva se repite dentro de ReasignarReserva).
+        internal static List<int> MesasParaReasignar(int idReserva)
+        {
+            ReservaVigente r = ObtenerReservaVigentePorId(idReserva);
+            List<int> mesas = new List<int>();
+            if (r == null) return mesas;
+            using (SqlConnection conexion = new SqlConnection(CadenaConexion))
+            {
+                conexion.Open();
+                DateTime inicio = ReservaReglas.InicioAtencion(r.FechaHora, r.Llego, ReservaReglas.AhoraServidor(conexion, null));
+                List<KeyValuePair<int, int>> libres = new List<KeyValuePair<int, int>>();
+                using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT id_mesa, [número] FROM dbo.MESA
+                    WHERE id_sucursal = @Sucursal AND [número] <> @Numero AND LOWER(LTRIM(RTRIM(estado))) = 'libre'
+                    ORDER BY [número];", conexion))
+                {
+                    cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
+                    cmd.Parameters.Add("@Numero", SqlDbType.Int).Value = r.NumeroMesa;
+                    using (SqlDataReader rd = cmd.ExecuteReader())
+                        while (rd.Read()) libres.Add(new KeyValuePair<int, int>(rd.GetInt32(0), Convert.ToInt32(rd[1])));
+                }
+                foreach (KeyValuePair<int, int> m in libres)
+                    if (ReservaReglas.MotivoMesaDestinoNoValida(conexion, null, idReserva, m.Key, r.Personas, inicio) == null)
+                        mesas.Add(m.Value);
+            }
+            return mesas;
+        }
+
+        // Traslada la reserva (mismo id_reserva, cliente y llegada registrada) a
+        // otra mesa. Todo se valida de nuevo en UNA transacción: si otro equipo
+        // tomó la mesa, se rechaza. La mesa original conserva su pedido activo;
+        // la nueva queda 'reservada' para el cliente si ya llegó o si su reserva
+        // ya debe apartarla.
+        internal static void ReasignarReserva(int idReserva, int numeroMesaDestino)
+        {
+            if (!SesionActual.Iniciada || !Permisos.AtiendeReservas(SesionActual.Cargo))
+                throw new Exception("Solo un Administrador, Cajero o Mesero puede reasignar una reserva.");
+
+            int idOrigen = 0, numeroOrigen = 0;
+            using (SqlConnection conexion = new SqlConnection(CadenaConexion))
+            {
+                conexion.Open();
+                using (SqlTransaction tx = conexion.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        DateTime ahora = ReservaReglas.AhoraServidor(conexion, tx);
+                        int idDestino, personas;
+                        DateTime fechaHora;
+                        bool llego;
+                        // Orden de bloqueo MESA -> RESERVA (igual que el resto del módulo).
+                        using (SqlCommand cmd = Comando(@"
+                            SELECT M.id_mesa, M.[número] FROM dbo.MESA M WITH (UPDLOCK, HOLDLOCK)
+                            WHERE M.id_sucursal = @Sucursal
+                              AND (M.[número] = @Destino
+                                   OR M.id_mesa = (SELECT id_mesa FROM dbo.RESERVA_MESA WHERE id_reserva = @Reserva))
+                            ORDER BY M.id_mesa;", conexion, tx))
+                        {
+                            cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
+                            cmd.Parameters.Add("@Destino", SqlDbType.Int).Value = numeroMesaDestino;
+                            cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
+                            idDestino = 0;
+                            using (SqlDataReader rd = cmd.ExecuteReader())
+                                while (rd.Read())
+                                    if (Convert.ToInt32(rd[1]) == numeroMesaDestino) idDestino = rd.GetInt32(0);
+                        }
+                        if (idDestino == 0) throw new Exception("La Mesa " + numeroMesaDestino + " no existe.");
+
+                        using (SqlCommand cmd = Comando(ReservaReglas.SqlAhora + @"
+                            SELECT R.id_mesa, M.[número], R.personas, R.fecha_hora,
+                                   CASE WHEN R.estado = 'finalizada' THEN 1 ELSE 0 END
+                            FROM dbo.RESERVA_MESA R WITH (UPDLOCK, HOLDLOCK)
+                            INNER JOIN dbo.MESA M ON M.id_mesa = R.id_mesa
+                            WHERE R.id_reserva = @Reserva
+                              AND ((R.estado = 'confirmada' AND DATEADD(MINUTE, @Tolerancia, R.fecha_hora) > @Ahora)
+                                   OR (" + ReservaReglas.SqlLlegadaPendiente + "));", conexion, tx))
+                        {
+                            ReservaReglas.AgregarParametros(cmd);
+                            cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
+                            using (SqlDataReader rd = cmd.ExecuteReader())
+                            {
+                                if (!rd.Read())
+                                    throw new Exception("La reserva N.º " + idReserva + " ya no está vigente (atendida, cancelada o vencida).");
+                                idOrigen = rd.GetInt32(0);
+                                numeroOrigen = Convert.ToInt32(rd[1]);
+                                personas = rd.GetInt32(2);
+                                fechaHora = rd.GetDateTime(3);
+                                llego = Convert.ToInt32(rd[4]) == 1;
+                            }
+                        }
+                        if (idDestino == idOrigen)
+                            throw new Exception("La reserva ya es de la Mesa " + numeroMesaDestino + ".");
+
+                        DateTime inicio = ReservaReglas.InicioAtencion(fechaHora, llego, ahora);
+                        string motivo = ReservaReglas.MotivoMesaDestinoNoValida(conexion, tx, idReserva, idDestino, personas, inicio);
+                        if (motivo != null)
+                            throw new Exception(motivo);
+
+                        using (SqlCommand cmd = Comando(@"
+                            UPDATE dbo.RESERVA_MESA SET id_mesa = @Destino
+                            WHERE id_reserva = @Reserva AND id_mesa = @Origen;", conexion, tx))
+                        {
+                            cmd.Parameters.Add("@Destino", SqlDbType.Int).Value = idDestino;
+                            cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
+                            cmd.Parameters.Add("@Origen", SqlDbType.Int).Value = idOrigen;
+                            if (cmd.ExecuteNonQuery() != 1) throw new Exception("No se pudo trasladar la reserva.");
+                        }
+
+                        // Destino y origen toman el estado que exige la regla única
+                        // (sin tocar mesas con pedido activo: la original sigue ocupada).
+                        using (SqlCommand cmd = Comando(ReservaReglas.SqlAhora + @"
+                            UPDATE M SET estado = " + ReservaReglas.SqlEstadoAlLiberar + @"
+                            FROM dbo.MESA M
+                            WHERE M.id_mesa IN (@Destino, @Origen)
+                              AND LOWER(LTRIM(RTRIM(M.estado))) IN ('libre', 'reservada')
+                              AND NOT EXISTS (SELECT 1 FROM dbo.PEDIDO P
+                                              WHERE P.id_mesa = M.id_mesa AND P.canal = 'salon'
+                                                AND P.estado IN ('pendiente','en_preparacion','listo','entregado'));", conexion, tx))
+                        {
+                            ReservaReglas.AgregarParametros(cmd);
+                            cmd.Parameters.Add("@Destino", SqlDbType.Int).Value = idDestino;
+                            cmd.Parameters.Add("@Origen", SqlDbType.Int).Value = idOrigen;
+                            cmd.ExecuteNonQuery();
+                        }
+                        tx.Commit();
+                    }
+                    catch
+                    {
+                        try { tx.Rollback(); } catch { }
+                        throw;
+                    }
+                }
+            }
+            Registro.Info("Reservas", "Reserva " + idReserva + " trasladada de la mesa " + numeroOrigen +
+                " a la mesa " + numeroMesaDestino + ".");
+            NotificarMesasActualizadas();
+        }
+
+        private static ReservaVigente LeerReserva(SqlDataReader rd)
+        {
+            return new ReservaVigente
+            {
+                IdReserva = rd.GetInt32(0),
+                NumeroMesa = Convert.ToInt32(rd[1]),
+                Cliente = Convert.ToString(rd[2]),
+                FechaHora = Convert.ToDateTime(rd[3]),
+                Telefono = Convert.ToString(rd[4]),
+                Personas = Convert.ToInt32(rd[5]),
+                Observacion = Convert.ToString(rd[6])
+            };
+        }
+
+        // El cliente llegó pero se retiró sin pedir: la llegada se anula (la
+        // reserva queda 'cancelada') y la mesa se libera si nada más la
+        // necesita. Nunca toca una mesa con pedido activo.
+        internal static bool AnularLlegadaSinPedido(int idReserva)
+        {
+            if (!SesionActual.Iniciada || !Permisos.AtiendeReservas(SesionActual.Cargo))
+                throw new Exception("Solo un Administrador, Cajero o Mesero puede anular una llegada.");
+
+            bool liberada = false;
+            int numero = 0;
+            using (SqlConnection conexion = new SqlConnection(CadenaConexion))
+            {
+                conexion.Open();
+                using (SqlTransaction tx = conexion.BeginTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        int idMesa;
+                        string estadoMesa;
+                        using (SqlCommand cmd = Comando(@"
+                            SELECT M.id_mesa, M.[número], LOWER(LTRIM(RTRIM(M.estado))) FROM dbo.MESA M WITH (UPDLOCK, HOLDLOCK)
+                            WHERE M.id_mesa = (SELECT id_mesa FROM dbo.RESERVA_MESA WHERE id_reserva = @Reserva)
+                              AND M.id_sucursal = @Sucursal;", conexion, tx))
+                        {
+                            cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
+                            cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
+                            using (SqlDataReader rd = cmd.ExecuteReader())
+                            {
+                                if (!rd.Read()) throw new Exception("La reserva ya no existe.");
+                                idMesa = rd.GetInt32(0);
+                                numero = Convert.ToInt32(rd[1]);
+                                estadoMesa = rd.GetString(2);
+                            }
+                        }
+                        if (!ReservaReglas.LlegadaPendienteValida(conexion, tx, idReserva, idMesa))
+                            throw new Exception("La reserva N.º " + idReserva + " no tiene una llegada pendiente de pedido.");
+
+                        using (SqlCommand cmd = Comando(@"
+                            UPDATE dbo.RESERVA_MESA SET estado = 'cancelada'
+                            WHERE id_reserva = @Reserva AND estado = 'finalizada';", conexion, tx))
+                        {
+                            cmd.Parameters.Add("@Reserva", SqlDbType.Int).Value = idReserva;
+                            if (cmd.ExecuteNonQuery() != 1) throw new Exception("No se pudo anular la llegada.");
+                        }
+
+                        if (estadoMesa == "reservada" &&
+                            !TienePedidoActivo(conexion, tx, idMesa) &&
+                            !TieneOtraReservaConfirmada(conexion, tx, idMesa, idReserva))
+                        {
+                            using (SqlCommand cmd = Comando(@"
+                                UPDATE dbo.MESA SET estado = 'libre'
+                                WHERE id_mesa = @Mesa AND estado = 'reservada';", conexion, tx))
+                            {
+                                cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
+                                liberada = cmd.ExecuteNonQuery() == 1;
+                            }
+                        }
+                        tx.Commit();
+                    }
+                    catch
+                    {
+                        try { tx.Rollback(); } catch { }
+                        throw;
+                    }
+                }
+            }
+            Registro.Info("Reservas", "Llegada de la reserva " + idReserva + " anulada sin pedido (mesa " + numero +
+                (liberada ? ", liberada)." : ", sin cambios en la mesa)."));
+            NotificarMesasActualizadas();
+            return liberada;
         }
 
         public static void ConfirmarLlegadaPorNumeroMesa(int numeroMesa)

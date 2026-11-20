@@ -52,9 +52,9 @@ namespace PROYECTO_RESTAURANTE
 
             // Hoy o una fecha posterior (hasta 30 días).
             dtpFechaReserva.Format = DateTimePickerFormat.Short;
-            dtpFechaReserva.Value = DateTime.Today;
-            dtpFechaReserva.MaxDate = DateTime.Today.AddDays(ReservaReglas.DiasAnticipacionMaxima);
-            dtpFechaReserva.MinDate = DateTime.Today;
+            dtpFechaReserva.Value = ReservaReglas.AhoraLocal().Date;
+            dtpFechaReserva.MaxDate = ReservaReglas.AhoraLocal().Date.AddDays(ReservaReglas.DiasAnticipacionMaxima);
+            dtpFechaReserva.MinDate = ReservaReglas.AhoraLocal().Date;
             dtpFechaReserva.Enabled = true;
             cmbHoraReserva.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbHoraReserva.Enabled = true;
@@ -240,7 +240,7 @@ namespace PROYECTO_RESTAURANTE
         {
             DateTime? fecha = ObtenerFechaHora();
             if (!fecha.HasValue) return "Elija una hora.";
-            return Motivo(FilaMesa(idMesa), fecha.Value, Personas(), DateTime.Now) ?? "";
+            return Motivo(FilaMesa(idMesa), fecha.Value, Personas(), ReservaReglas.AhoraLocal()) ?? "";
         }
 
         // ======================================================
@@ -253,7 +253,7 @@ namespace PROYECTO_RESTAURANTE
         private void CargarHorarios()
         {
             string horaAnterior = cmbHoraReserva.SelectedItem as string;
-            DateTime ahora = DateTime.Now;
+            DateTime ahora = ReservaReglas.AhoraLocal();
             int personas = Personas();
 
             cargando = true;
@@ -341,7 +341,7 @@ namespace PROYECTO_RESTAURANTE
         {
             DateTime? fechaHora = ObtenerFechaHora();
             int personas = Personas();
-            DateTime ahora = DateTime.Now;
+            DateTime ahora = ReservaReglas.AhoraLocal();
 
             DataTable disponibles = new DataTable();
             disponibles.Columns.Add("id_mesa", typeof(int));
@@ -455,7 +455,7 @@ namespace PROYECTO_RESTAURANTE
             }
 
             DateTime? fechaReserva = ObtenerFechaHora();
-            if (!fechaReserva.HasValue || !ReservaReglas.HorarioValido(fechaReserva.Value, DateTime.Now))
+            if (!fechaReserva.HasValue || !ReservaReglas.HorarioValido(fechaReserva.Value, ReservaReglas.AhoraLocal()))
             {
                 MessageBox.Show("Elija un horario válido: " + ReservaReglas.TextoHorario() +
                     ", cada " + ReservaReglas.IntervaloMinutos + " minutos y posterior a la hora actual.");
@@ -595,6 +595,15 @@ namespace PROYECTO_RESTAURANTE
             int personas, string observacion, int? idCliente, out bool apartada)
         {
             apartada = false;
+            // Mismas reglas del formulario, también aquí: un texto más largo
+            // que la columna no debe guardarse recortado.
+            cliente = (cliente ?? "").Trim();
+            if (cliente.Length < 3 || cliente.Length > 100)
+                throw new Exception("Ingrese un nombre válido de 3 a 100 caracteres.");
+            if (observacion != null && observacion.Trim().Length > 250)
+                throw new Exception("La observación no puede superar 250 caracteres.");
+            if (personas <= 0)
+                throw new Exception("Indique un número de personas válido.");
             using (SqlConnection conexion = new SqlConnection(cadenaConexion))
             {
                 conexion.Open();

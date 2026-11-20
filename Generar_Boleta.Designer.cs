@@ -220,17 +220,19 @@
             this.guna2Panel1.Controls.Add(this.guna2HtmlLabel1);
             this.guna2Panel1.Controls.Add(this.guna2PictureBox1);
             this.guna2Panel1.Location = new System.Drawing.Point(0, -1);
+            this.guna2Panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Panel1.Name = "guna2Panel1";
-            this.guna2Panel1.Size = new System.Drawing.Size(1424, 97);
+            this.guna2Panel1.Size = new System.Drawing.Size(1899, 119);
             this.guna2Panel1.TabIndex = 0;
             // 
             // btnCerrarBoleta
             // 
             this.btnCerrarBoleta.Image = ((System.Drawing.Image)(resources.GetObject("btnCerrarBoleta.Image")));
             this.btnCerrarBoleta.ImageRotate = 0F;
-            this.btnCerrarBoleta.Location = new System.Drawing.Point(1259, 33);
+            this.btnCerrarBoleta.Location = new System.Drawing.Point(1679, 41);
+            this.btnCerrarBoleta.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnCerrarBoleta.Name = "btnCerrarBoleta";
-            this.btnCerrarBoleta.Size = new System.Drawing.Size(27, 29);
+            this.btnCerrarBoleta.Size = new System.Drawing.Size(36, 36);
             this.btnCerrarBoleta.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.btnCerrarBoleta.TabIndex = 1;
             this.btnCerrarBoleta.TabStop = false;
@@ -246,9 +248,10 @@
             this.guna2Button1.FillColor = System.Drawing.Color.White;
             this.guna2Button1.Font = new System.Drawing.Font("Segoe UI", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2Button1.ForeColor = System.Drawing.Color.Black;
-            this.guna2Button1.Location = new System.Drawing.Point(1251, 28);
+            this.guna2Button1.Location = new System.Drawing.Point(1668, 34);
+            this.guna2Button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Button1.Name = "guna2Button1";
-            this.guna2Button1.Size = new System.Drawing.Size(41, 40);
+            this.guna2Button1.Size = new System.Drawing.Size(55, 49);
             this.guna2Button1.TabIndex = 3;
             this.guna2Button1.Click += new System.EventHandler(this.guna2Button1_Click);
             // 
@@ -256,9 +259,10 @@
             // 
             this.guna2HtmlLabel2.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel2.Location = new System.Drawing.Point(90, 49);
+            this.guna2HtmlLabel2.Location = new System.Drawing.Point(120, 60);
+            this.guna2HtmlLabel2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel2.Name = "guna2HtmlLabel2";
-            this.guna2HtmlLabel2.Size = new System.Drawing.Size(437, 22);
+            this.guna2HtmlLabel2.Size = new System.Drawing.Size(537, 27);
             this.guna2HtmlLabel2.TabIndex = 2;
             this.guna2HtmlLabel2.Text = "Revisar los datos del pedido y confirme la emisión de la boleta";
             // 
@@ -266,9 +270,10 @@
             // 
             this.guna2HtmlLabel1.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel1.Location = new System.Drawing.Point(90, 16);
+            this.guna2HtmlLabel1.Location = new System.Drawing.Point(120, 20);
+            this.guna2HtmlLabel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel1.Name = "guna2HtmlLabel1";
-            this.guna2HtmlLabel1.Size = new System.Drawing.Size(341, 27);
+            this.guna2HtmlLabel1.Size = new System.Drawing.Size(412, 32);
             this.guna2HtmlLabel1.TabIndex = 1;
             this.guna2HtmlLabel1.Text = "GENERAR E IMPRIMIR BOLETA";
             // 
@@ -278,9 +283,10 @@
             this.guna2PictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox1.Image")));
             this.guna2PictureBox1.ImageRotate = 0F;
             this.guna2PictureBox1.InitialImage = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox1.InitialImage")));
-            this.guna2PictureBox1.Location = new System.Drawing.Point(12, 3);
+            this.guna2PictureBox1.Location = new System.Drawing.Point(16, 4);
+            this.guna2PictureBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2PictureBox1.Name = "guna2PictureBox1";
-            this.guna2PictureBox1.Size = new System.Drawing.Size(72, 70);
+            this.guna2PictureBox1.Size = new System.Drawing.Size(96, 86);
             this.guna2PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.guna2PictureBox1.TabIndex = 0;
             this.guna2PictureBox1.TabStop = false;
@@ -291,9 +297,10 @@
             this.guna2Panel2.Controls.Add(this.guna2Panel6);
             this.guna2Panel2.Controls.Add(this.guna2Panel3);
             this.guna2Panel2.FillColor = System.Drawing.Color.White;
-            this.guna2Panel2.Location = new System.Drawing.Point(0, 93);
+            this.guna2Panel2.Location = new System.Drawing.Point(0, 114);
+            this.guna2Panel2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Panel2.Name = "guna2Panel2";
-            this.guna2Panel2.Size = new System.Drawing.Size(1319, 819);
+            this.guna2Panel2.Size = new System.Drawing.Size(1759, 1008);
             this.guna2Panel2.TabIndex = 1;
             // 
             // guna2Panel7
@@ -345,9 +352,10 @@
             this.guna2Panel7.Controls.Add(this.guna2PictureBox8);
             this.guna2Panel7.Controls.Add(this.guna2HtmlLabel28);
             this.guna2Panel7.FillColor = System.Drawing.Color.WhiteSmoke;
-            this.guna2Panel7.Location = new System.Drawing.Point(919, 9);
+            this.guna2Panel7.Location = new System.Drawing.Point(1225, 11);
+            this.guna2Panel7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Panel7.Name = "guna2Panel7";
-            this.guna2Panel7.Size = new System.Drawing.Size(381, 807);
+            this.guna2Panel7.Size = new System.Drawing.Size(508, 993);
             this.guna2Panel7.TabIndex = 35;
             // 
             // cmbMetodoPago2
@@ -361,9 +369,10 @@
             this.cmbMetodoPago2.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.cmbMetodoPago2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(68)))), ((int)(((byte)(88)))), ((int)(((byte)(112)))));
             this.cmbMetodoPago2.ItemHeight = 30;
-            this.cmbMetodoPago2.Location = new System.Drawing.Point(95, 332);
+            this.cmbMetodoPago2.Location = new System.Drawing.Point(127, 409);
+            this.cmbMetodoPago2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.cmbMetodoPago2.Name = "cmbMetodoPago2";
-            this.cmbMetodoPago2.Size = new System.Drawing.Size(104, 36);
+            this.cmbMetodoPago2.Size = new System.Drawing.Size(137, 36);
             this.cmbMetodoPago2.TabIndex = 106;
             // 
             // btnCalcularVuelto
@@ -377,9 +386,10 @@
             this.btnCalcularVuelto.FillColor = System.Drawing.Color.Gold;
             this.btnCalcularVuelto.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCalcularVuelto.ForeColor = System.Drawing.Color.Black;
-            this.btnCalcularVuelto.Location = new System.Drawing.Point(256, 459);
+            this.btnCalcularVuelto.Location = new System.Drawing.Point(341, 565);
+            this.btnCalcularVuelto.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnCalcularVuelto.Name = "btnCalcularVuelto";
-            this.btnCalcularVuelto.Size = new System.Drawing.Size(102, 43);
+            this.btnCalcularVuelto.Size = new System.Drawing.Size(136, 53);
             this.btnCalcularVuelto.TabIndex = 105;
             this.btnCalcularVuelto.Text = "Calcular";
             // 
@@ -397,21 +407,22 @@
             this.txtVueltoBoleta.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.txtVueltoBoleta.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtVueltoBoleta.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtVueltoBoleta.Location = new System.Drawing.Point(132, 465);
-            this.txtVueltoBoleta.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.txtVueltoBoleta.Location = new System.Drawing.Point(176, 572);
+            this.txtVueltoBoleta.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.txtVueltoBoleta.Name = "txtVueltoBoleta";
             this.txtVueltoBoleta.PlaceholderText = "Efectivo";
             this.txtVueltoBoleta.SelectedText = "";
-            this.txtVueltoBoleta.Size = new System.Drawing.Size(97, 37);
+            this.txtVueltoBoleta.Size = new System.Drawing.Size(129, 46);
             this.txtVueltoBoleta.TabIndex = 104;
             // 
             // lblVuelto
             // 
             this.lblVuelto.BackColor = System.Drawing.Color.Transparent;
             this.lblVuelto.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblVuelto.Location = new System.Drawing.Point(52, 468);
+            this.lblVuelto.Location = new System.Drawing.Point(69, 576);
+            this.lblVuelto.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblVuelto.Name = "lblVuelto";
-            this.lblVuelto.Size = new System.Drawing.Size(48, 20);
+            this.lblVuelto.Size = new System.Drawing.Size(62, 26);
             this.lblVuelto.TabIndex = 103;
             this.lblVuelto.Text = "Vuelto:";
             // 
@@ -421,10 +432,10 @@
             this.numMontoRecibido.BorderRadius = 5;
             this.numMontoRecibido.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.numMontoRecibido.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.numMontoRecibido.Location = new System.Drawing.Point(192, 416);
-            this.numMontoRecibido.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.numMontoRecibido.Location = new System.Drawing.Point(256, 512);
+            this.numMontoRecibido.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.numMontoRecibido.Name = "numMontoRecibido";
-            this.numMontoRecibido.Size = new System.Drawing.Size(75, 36);
+            this.numMontoRecibido.Size = new System.Drawing.Size(100, 44);
             this.numMontoRecibido.TabIndex = 102;
             this.numMontoRecibido.UpDownButtonFillColor = System.Drawing.Color.Gold;
             // 
@@ -432,9 +443,10 @@
             // 
             this.lblMontoRecibido.BackColor = System.Drawing.Color.Transparent;
             this.lblMontoRecibido.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMontoRecibido.Location = new System.Drawing.Point(43, 421);
+            this.lblMontoRecibido.Location = new System.Drawing.Point(57, 518);
+            this.lblMontoRecibido.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblMontoRecibido.Name = "lblMontoRecibido";
-            this.lblMontoRecibido.Size = new System.Drawing.Size(112, 20);
+            this.lblMontoRecibido.Size = new System.Drawing.Size(141, 26);
             this.lblMontoRecibido.TabIndex = 101;
             this.lblMontoRecibido.Text = "Monto Recibido:";
             // 
@@ -444,9 +456,10 @@
             this.guna2PictureBox6.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox6.Image")));
             this.guna2PictureBox6.ImageRotate = 0F;
             this.guna2PictureBox6.InitialImage = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox6.InitialImage")));
-            this.guna2PictureBox6.Location = new System.Drawing.Point(11, 375);
+            this.guna2PictureBox6.Location = new System.Drawing.Point(15, 462);
+            this.guna2PictureBox6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2PictureBox6.Name = "guna2PictureBox6";
-            this.guna2PictureBox6.Size = new System.Drawing.Size(28, 32);
+            this.guna2PictureBox6.Size = new System.Drawing.Size(37, 39);
             this.guna2PictureBox6.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.guna2PictureBox6.TabIndex = 99;
             this.guna2PictureBox6.TabStop = false;
@@ -455,9 +468,10 @@
             // 
             this.lblTituloCambio.BackColor = System.Drawing.Color.Transparent;
             this.lblTituloCambio.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTituloCambio.Location = new System.Drawing.Point(48, 379);
+            this.lblTituloCambio.Location = new System.Drawing.Point(64, 466);
+            this.lblTituloCambio.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblTituloCambio.Name = "lblTituloCambio";
-            this.lblTituloCambio.Size = new System.Drawing.Size(74, 26);
+            this.lblTituloCambio.Size = new System.Drawing.Size(93, 31);
             this.lblTituloCambio.TabIndex = 100;
             this.lblTituloCambio.Text = "Cambio";
             // 
@@ -465,9 +479,10 @@
             // 
             this.guna2HtmlLabel21.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel21.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel21.Location = new System.Drawing.Point(205, 341);
+            this.guna2HtmlLabel21.Location = new System.Drawing.Point(273, 420);
+            this.guna2HtmlLabel21.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel21.Name = "guna2HtmlLabel21";
-            this.guna2HtmlLabel21.Size = new System.Drawing.Size(59, 20);
+            this.guna2HtmlLabel21.Size = new System.Drawing.Size(73, 26);
             this.guna2HtmlLabel21.TabIndex = 98;
             this.guna2HtmlLabel21.Text = "Saldo S/";
             // 
@@ -477,10 +492,10 @@
             this.txtMontoPago2.BorderRadius = 5;
             this.txtMontoPago2.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.txtMontoPago2.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.txtMontoPago2.Location = new System.Drawing.Point(283, 332);
-            this.txtMontoPago2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.txtMontoPago2.Location = new System.Drawing.Point(377, 409);
+            this.txtMontoPago2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.txtMontoPago2.Name = "txtMontoPago2";
-            this.txtMontoPago2.Size = new System.Drawing.Size(75, 36);
+            this.txtMontoPago2.Size = new System.Drawing.Size(100, 44);
             this.txtMontoPago2.TabIndex = 97;
             this.txtMontoPago2.UpDownButtonFillColor = System.Drawing.Color.Gold;
             // 
@@ -488,9 +503,10 @@
             // 
             this.guna2HtmlLabel30.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel30.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel30.Location = new System.Drawing.Point(23, 341);
+            this.guna2HtmlLabel30.Location = new System.Drawing.Point(31, 420);
+            this.guna2HtmlLabel30.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel30.Name = "guna2HtmlLabel30";
-            this.guna2HtmlLabel30.Size = new System.Drawing.Size(58, 20);
+            this.guna2HtmlLabel30.Size = new System.Drawing.Size(72, 26);
             this.guna2HtmlLabel30.TabIndex = 96;
             this.guna2HtmlLabel30.Text = "Metodo:";
             // 
@@ -498,9 +514,10 @@
             // 
             this.lblTituloPago2.BackColor = System.Drawing.Color.Transparent;
             this.lblTituloPago2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTituloPago2.Location = new System.Drawing.Point(23, 314);
+            this.lblTituloPago2.Location = new System.Drawing.Point(31, 386);
+            this.lblTituloPago2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblTituloPago2.Name = "lblTituloPago2";
-            this.lblTituloPago2.Size = new System.Drawing.Size(52, 18);
+            this.lblTituloPago2.Size = new System.Drawing.Size(59, 22);
             this.lblTituloPago2.TabIndex = 94;
             this.lblTituloPago2.Text = "Pago 2";
             // 
@@ -508,9 +525,10 @@
             // 
             this.lblMontoPago1.BackColor = System.Drawing.Color.Transparent;
             this.lblMontoPago1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMontoPago1.Location = new System.Drawing.Point(205, 280);
+            this.lblMontoPago1.Location = new System.Drawing.Point(273, 345);
+            this.lblMontoPago1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblMontoPago1.Name = "lblMontoPago1";
-            this.lblMontoPago1.Size = new System.Drawing.Size(59, 20);
+            this.lblMontoPago1.Size = new System.Drawing.Size(73, 26);
             this.lblMontoPago1.TabIndex = 93;
             this.lblMontoPago1.Text = "Saldo S/";
             // 
@@ -520,10 +538,10 @@
             this.numMontoPago1.BorderRadius = 5;
             this.numMontoPago1.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.numMontoPago1.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.numMontoPago1.Location = new System.Drawing.Point(283, 271);
-            this.numMontoPago1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.numMontoPago1.Location = new System.Drawing.Point(377, 334);
+            this.numMontoPago1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.numMontoPago1.Name = "numMontoPago1";
-            this.numMontoPago1.Size = new System.Drawing.Size(75, 36);
+            this.numMontoPago1.Size = new System.Drawing.Size(100, 44);
             this.numMontoPago1.TabIndex = 92;
             this.numMontoPago1.UpDownButtonFillColor = System.Drawing.Color.Gold;
             // 
@@ -531,9 +549,10 @@
             // 
             this.lblMetodoPago1.BackColor = System.Drawing.Color.Transparent;
             this.lblMetodoPago1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMetodoPago1.Location = new System.Drawing.Point(23, 280);
+            this.lblMetodoPago1.Location = new System.Drawing.Point(31, 345);
+            this.lblMetodoPago1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblMetodoPago1.Name = "lblMetodoPago1";
-            this.lblMetodoPago1.Size = new System.Drawing.Size(58, 20);
+            this.lblMetodoPago1.Size = new System.Drawing.Size(72, 26);
             this.lblMetodoPago1.TabIndex = 91;
             this.lblMetodoPago1.Text = "Metodo:";
             // 
@@ -551,21 +570,22 @@
             this.txtMetodoPago1.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.txtMetodoPago1.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtMetodoPago1.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtMetodoPago1.Location = new System.Drawing.Point(101, 277);
-            this.txtMetodoPago1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.txtMetodoPago1.Location = new System.Drawing.Point(135, 341);
+            this.txtMetodoPago1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.txtMetodoPago1.Name = "txtMetodoPago1";
             this.txtMetodoPago1.PlaceholderText = "Efectivo";
             this.txtMetodoPago1.SelectedText = "";
-            this.txtMetodoPago1.Size = new System.Drawing.Size(76, 26);
+            this.txtMetodoPago1.Size = new System.Drawing.Size(101, 32);
             this.txtMetodoPago1.TabIndex = 90;
             // 
             // lblTituloPago1
             // 
             this.lblTituloPago1.BackColor = System.Drawing.Color.Transparent;
             this.lblTituloPago1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTituloPago1.Location = new System.Drawing.Point(23, 253);
+            this.lblTituloPago1.Location = new System.Drawing.Point(31, 311);
+            this.lblTituloPago1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblTituloPago1.Name = "lblTituloPago1";
-            this.lblTituloPago1.Size = new System.Drawing.Size(52, 18);
+            this.lblTituloPago1.Size = new System.Drawing.Size(59, 22);
             this.lblTituloPago1.TabIndex = 88;
             this.lblTituloPago1.Text = "Pago 1 ";
             // 
@@ -573,9 +593,10 @@
             // 
             this.guna2HtmlLabel22.BackColor = System.Drawing.Color.Khaki;
             this.guna2HtmlLabel22.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel22.Location = new System.Drawing.Point(279, 746);
+            this.guna2HtmlLabel22.Location = new System.Drawing.Point(372, 918);
+            this.guna2HtmlLabel22.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel22.Name = "guna2HtmlLabel22";
-            this.guna2HtmlLabel22.Size = new System.Drawing.Size(55, 20);
+            this.guna2HtmlLabel22.Size = new System.Drawing.Size(66, 26);
             this.guna2HtmlLabel22.TabIndex = 87;
             this.guna2HtmlLabel22.Text = "Cobrar";
             // 
@@ -590,9 +611,10 @@
             this.btnRegistrarCobro.FillColor = System.Drawing.Color.Khaki;
             this.btnRegistrarCobro.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.btnRegistrarCobro.ForeColor = System.Drawing.Color.White;
-            this.btnRegistrarCobro.Location = new System.Drawing.Point(205, 718);
+            this.btnRegistrarCobro.Location = new System.Drawing.Point(273, 884);
+            this.btnRegistrarCobro.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnRegistrarCobro.Name = "btnRegistrarCobro";
-            this.btnRegistrarCobro.Size = new System.Drawing.Size(158, 75);
+            this.btnRegistrarCobro.Size = new System.Drawing.Size(211, 92);
             this.btnRegistrarCobro.TabIndex = 86;
             this.btnRegistrarCobro.Click += new System.EventHandler(this.btnRegistrarCobro_Click);
             // 
@@ -606,9 +628,10 @@
             this.rbPagoPlin.CheckedState.InnerColor = System.Drawing.Color.White;
             this.rbPagoPlin.CheckedState.InnerOffset = -4;
             this.rbPagoPlin.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbPagoPlin.Location = new System.Drawing.Point(301, 147);
+            this.rbPagoPlin.Location = new System.Drawing.Point(401, 181);
+            this.rbPagoPlin.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbPagoPlin.Name = "rbPagoPlin";
-            this.rbPagoPlin.Size = new System.Drawing.Size(50, 22);
+            this.rbPagoPlin.Size = new System.Drawing.Size(62, 28);
             this.rbPagoPlin.TabIndex = 77;
             this.rbPagoPlin.Text = "Plin";
             this.rbPagoPlin.UncheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
@@ -623,9 +646,10 @@
             this.guna2PictureBox16.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox16.Image")));
             this.guna2PictureBox16.ImageRotate = 0F;
             this.guna2PictureBox16.InitialImage = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox16.InitialImage")));
-            this.guna2PictureBox16.Location = new System.Drawing.Point(14, 218);
+            this.guna2PictureBox16.Location = new System.Drawing.Point(19, 268);
+            this.guna2PictureBox16.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2PictureBox16.Name = "guna2PictureBox16";
-            this.guna2PictureBox16.Size = new System.Drawing.Size(28, 32);
+            this.guna2PictureBox16.Size = new System.Drawing.Size(37, 39);
             this.guna2PictureBox16.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.guna2PictureBox16.TabIndex = 71;
             this.guna2PictureBox16.TabStop = false;
@@ -634,9 +658,10 @@
             // 
             this.lblTituloPagoMixto.BackColor = System.Drawing.Color.Transparent;
             this.lblTituloPagoMixto.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTituloPagoMixto.Location = new System.Drawing.Point(48, 221);
+            this.lblTituloPagoMixto.Location = new System.Drawing.Point(64, 272);
+            this.lblTituloPagoMixto.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblTituloPagoMixto.Name = "lblTituloPagoMixto";
-            this.lblTituloPagoMixto.Size = new System.Drawing.Size(107, 26);
+            this.lblTituloPagoMixto.Size = new System.Drawing.Size(133, 31);
             this.lblTituloPagoMixto.TabIndex = 72;
             this.lblTituloPagoMixto.Text = "Pago Mixto";
             // 
@@ -653,12 +678,12 @@
             this.txtObservacionesBoleta.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.txtObservacionesBoleta.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtObservacionesBoleta.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtObservacionesBoleta.Location = new System.Drawing.Point(21, 561);
-            this.txtObservacionesBoleta.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.txtObservacionesBoleta.Location = new System.Drawing.Point(28, 690);
+            this.txtObservacionesBoleta.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.txtObservacionesBoleta.Name = "txtObservacionesBoleta";
             this.txtObservacionesBoleta.PlaceholderText = "Escriba alguna observación...";
             this.txtObservacionesBoleta.SelectedText = "";
-            this.txtObservacionesBoleta.Size = new System.Drawing.Size(337, 68);
+            this.txtObservacionesBoleta.Size = new System.Drawing.Size(449, 84);
             this.txtObservacionesBoleta.TabIndex = 70;
             // 
             // guna2PictureBox15
@@ -667,9 +692,10 @@
             this.guna2PictureBox15.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox15.Image")));
             this.guna2PictureBox15.ImageRotate = 0F;
             this.guna2PictureBox15.InitialImage = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox15.InitialImage")));
-            this.guna2PictureBox15.Location = new System.Drawing.Point(10, 518);
+            this.guna2PictureBox15.Location = new System.Drawing.Point(13, 638);
+            this.guna2PictureBox15.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2PictureBox15.Name = "guna2PictureBox15";
-            this.guna2PictureBox15.Size = new System.Drawing.Size(28, 32);
+            this.guna2PictureBox15.Size = new System.Drawing.Size(37, 39);
             this.guna2PictureBox15.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.guna2PictureBox15.TabIndex = 67;
             this.guna2PictureBox15.TabStop = false;
@@ -678,9 +704,10 @@
             // 
             this.guna2HtmlLabel58.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel58.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel58.Location = new System.Drawing.Point(47, 522);
+            this.guna2HtmlLabel58.Location = new System.Drawing.Point(63, 642);
+            this.guna2HtmlLabel58.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel58.Name = "guna2HtmlLabel58";
-            this.guna2HtmlLabel58.Size = new System.Drawing.Size(243, 26);
+            this.guna2HtmlLabel58.Size = new System.Drawing.Size(303, 31);
             this.guna2HtmlLabel58.TabIndex = 68;
             this.guna2HtmlLabel58.Text = "Observaciones (opcional)";
             // 
@@ -694,9 +721,10 @@
             this.rbPagoTransferencia.CheckedState.InnerColor = System.Drawing.Color.White;
             this.rbPagoTransferencia.CheckedState.InnerOffset = -4;
             this.rbPagoTransferencia.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbPagoTransferencia.Location = new System.Drawing.Point(141, 147);
+            this.rbPagoTransferencia.Location = new System.Drawing.Point(188, 181);
+            this.rbPagoTransferencia.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbPagoTransferencia.Name = "rbPagoTransferencia";
-            this.rbPagoTransferencia.Size = new System.Drawing.Size(116, 22);
+            this.rbPagoTransferencia.Size = new System.Drawing.Size(146, 28);
             this.rbPagoTransferencia.TabIndex = 66;
             this.rbPagoTransferencia.Text = "Transferencia\n";
             this.rbPagoTransferencia.UncheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
@@ -715,9 +743,10 @@
             this.rbPagoMixto.CheckedState.InnerColor = System.Drawing.Color.White;
             this.rbPagoMixto.CheckedState.InnerOffset = -4;
             this.rbPagoMixto.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F);
-            this.rbPagoMixto.Location = new System.Drawing.Point(301, 176);
+            this.rbPagoMixto.Location = new System.Drawing.Point(401, 217);
+            this.rbPagoMixto.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbPagoMixto.Name = "rbPagoMixto";
-            this.rbPagoMixto.Size = new System.Drawing.Size(62, 22);
+            this.rbPagoMixto.Size = new System.Drawing.Size(76, 28);
             this.rbPagoMixto.TabIndex = 65;
             this.rbPagoMixto.Text = "Mixto";
             this.rbPagoMixto.UncheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
@@ -736,9 +765,10 @@
             this.rbPagoYape.CheckedState.InnerColor = System.Drawing.Color.White;
             this.rbPagoYape.CheckedState.InnerOffset = -4;
             this.rbPagoYape.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbPagoYape.Location = new System.Drawing.Point(21, 176);
+            this.rbPagoYape.Location = new System.Drawing.Point(28, 217);
+            this.rbPagoYape.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbPagoYape.Name = "rbPagoYape";
-            this.rbPagoYape.Size = new System.Drawing.Size(59, 22);
+            this.rbPagoYape.Size = new System.Drawing.Size(75, 28);
             this.rbPagoYape.TabIndex = 64;
             this.rbPagoYape.Text = "Yape";
             this.rbPagoYape.UncheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
@@ -757,9 +787,10 @@
             this.rbPagoTarjeta.CheckedState.InnerColor = System.Drawing.Color.White;
             this.rbPagoTarjeta.CheckedState.InnerOffset = -4;
             this.rbPagoTarjeta.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbPagoTarjeta.Location = new System.Drawing.Point(145, 177);
+            this.rbPagoTarjeta.Location = new System.Drawing.Point(193, 218);
+            this.rbPagoTarjeta.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbPagoTarjeta.Name = "rbPagoTarjeta";
-            this.rbPagoTarjeta.Size = new System.Drawing.Size(71, 22);
+            this.rbPagoTarjeta.Size = new System.Drawing.Size(88, 28);
             this.rbPagoTarjeta.TabIndex = 63;
             this.rbPagoTarjeta.Text = "Tarjeta\n";
             this.rbPagoTarjeta.UncheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
@@ -779,9 +810,10 @@
             this.rbPagoEfectivo.CheckedState.InnerColor = System.Drawing.Color.White;
             this.rbPagoEfectivo.CheckedState.InnerOffset = -4;
             this.rbPagoEfectivo.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbPagoEfectivo.Location = new System.Drawing.Point(21, 147);
+            this.rbPagoEfectivo.Location = new System.Drawing.Point(28, 181);
+            this.rbPagoEfectivo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.rbPagoEfectivo.Name = "rbPagoEfectivo";
-            this.rbPagoEfectivo.Size = new System.Drawing.Size(79, 22);
+            this.rbPagoEfectivo.Size = new System.Drawing.Size(97, 28);
             this.rbPagoEfectivo.TabIndex = 62;
             this.rbPagoEfectivo.Text = "Efectivo";
             this.rbPagoEfectivo.UncheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
@@ -797,9 +829,10 @@
             this.guna2PictureBox14.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox14.Image")));
             this.guna2PictureBox14.ImageRotate = 0F;
             this.guna2PictureBox14.InitialImage = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox14.InitialImage")));
-            this.guna2PictureBox14.Location = new System.Drawing.Point(10, 105);
+            this.guna2PictureBox14.Location = new System.Drawing.Point(13, 129);
+            this.guna2PictureBox14.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2PictureBox14.Name = "guna2PictureBox14";
-            this.guna2PictureBox14.Size = new System.Drawing.Size(28, 32);
+            this.guna2PictureBox14.Size = new System.Drawing.Size(37, 39);
             this.guna2PictureBox14.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.guna2PictureBox14.TabIndex = 60;
             this.guna2PictureBox14.TabStop = false;
@@ -808,9 +841,10 @@
             // 
             this.guna2HtmlLabel57.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel57.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel57.Location = new System.Drawing.Point(47, 109);
+            this.guna2HtmlLabel57.Location = new System.Drawing.Point(63, 134);
+            this.guna2HtmlLabel57.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel57.Name = "guna2HtmlLabel57";
-            this.guna2HtmlLabel57.Size = new System.Drawing.Size(147, 26);
+            this.guna2HtmlLabel57.Size = new System.Drawing.Size(183, 31);
             this.guna2HtmlLabel57.TabIndex = 61;
             this.guna2HtmlLabel57.Text = "Forma de Pago ";
             // 
@@ -820,10 +854,10 @@
             this.numCopiasBoleta.BorderRadius = 5;
             this.numCopiasBoleta.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.numCopiasBoleta.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.numCopiasBoleta.Location = new System.Drawing.Point(259, 67);
-            this.numCopiasBoleta.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.numCopiasBoleta.Location = new System.Drawing.Point(345, 82);
+            this.numCopiasBoleta.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.numCopiasBoleta.Name = "numCopiasBoleta";
-            this.numCopiasBoleta.Size = new System.Drawing.Size(75, 36);
+            this.numCopiasBoleta.Size = new System.Drawing.Size(100, 44);
             this.numCopiasBoleta.TabIndex = 59;
             this.numCopiasBoleta.UpDownButtonFillColor = System.Drawing.Color.Gold;
             // 
@@ -831,9 +865,10 @@
             // 
             this.guna2HtmlLabel55.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel55.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel55.Location = new System.Drawing.Point(205, 41);
+            this.guna2HtmlLabel55.Location = new System.Drawing.Point(273, 50);
+            this.guna2HtmlLabel55.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel55.Name = "guna2HtmlLabel55";
-            this.guna2HtmlLabel55.Size = new System.Drawing.Size(129, 20);
+            this.guna2HtmlLabel55.Size = new System.Drawing.Size(164, 26);
             this.guna2HtmlLabel55.TabIndex = 51;
             this.guna2HtmlLabel55.Text = "Número de copias:";
             // 
@@ -848,18 +883,20 @@
             this.cmbImpresoraBoleta.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.cmbImpresoraBoleta.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(68)))), ((int)(((byte)(88)))), ((int)(((byte)(112)))));
             this.cmbImpresoraBoleta.ItemHeight = 30;
-            this.cmbImpresoraBoleta.Location = new System.Drawing.Point(36, 67);
+            this.cmbImpresoraBoleta.Location = new System.Drawing.Point(48, 82);
+            this.cmbImpresoraBoleta.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.cmbImpresoraBoleta.Name = "cmbImpresoraBoleta";
-            this.cmbImpresoraBoleta.Size = new System.Drawing.Size(159, 36);
+            this.cmbImpresoraBoleta.Size = new System.Drawing.Size(211, 36);
             this.cmbImpresoraBoleta.TabIndex = 58;
             // 
             // guna2HtmlLabel27
             // 
             this.guna2HtmlLabel27.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel27.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel27.Location = new System.Drawing.Point(22, 43);
+            this.guna2HtmlLabel27.Location = new System.Drawing.Point(29, 53);
+            this.guna2HtmlLabel27.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel27.Name = "guna2HtmlLabel27";
-            this.guna2HtmlLabel27.Size = new System.Drawing.Size(77, 18);
+            this.guna2HtmlLabel27.Size = new System.Drawing.Size(89, 22);
             this.guna2HtmlLabel27.TabIndex = 57;
             this.guna2HtmlLabel27.Text = "Impresora:";
             // 
@@ -867,9 +904,10 @@
             // 
             this.guna2HtmlLabel49.BackColor = System.Drawing.Color.Red;
             this.guna2HtmlLabel49.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel49.Location = new System.Drawing.Point(95, 666);
+            this.guna2HtmlLabel49.Location = new System.Drawing.Point(127, 820);
+            this.guna2HtmlLabel49.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel49.Name = "guna2HtmlLabel49";
-            this.guna2HtmlLabel49.Size = new System.Drawing.Size(70, 20);
+            this.guna2HtmlLabel49.Size = new System.Drawing.Size(86, 26);
             this.guna2HtmlLabel49.TabIndex = 14;
             this.guna2HtmlLabel49.Text = "Cancelar";
             // 
@@ -877,9 +915,10 @@
             // 
             this.guna2HtmlLabel47.BackColor = System.Drawing.Color.Gold;
             this.guna2HtmlLabel47.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel47.Location = new System.Drawing.Point(101, 746);
+            this.guna2HtmlLabel47.Location = new System.Drawing.Point(135, 918);
+            this.guna2HtmlLabel47.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel47.Name = "guna2HtmlLabel47";
-            this.guna2HtmlLabel47.Size = new System.Drawing.Size(64, 20);
+            this.guna2HtmlLabel47.Size = new System.Drawing.Size(78, 26);
             this.guna2HtmlLabel47.TabIndex = 13;
             this.guna2HtmlLabel47.Text = "Imprimir";
             // 
@@ -887,9 +926,10 @@
             // 
             this.guna2HtmlLabel23.BackColor = System.Drawing.Color.Khaki;
             this.guna2HtmlLabel23.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel23.Location = new System.Drawing.Point(261, 666);
+            this.guna2HtmlLabel23.Location = new System.Drawing.Point(348, 820);
+            this.guna2HtmlLabel23.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel23.Name = "guna2HtmlLabel23";
-            this.guna2HtmlLabel23.Size = new System.Drawing.Size(90, 20);
+            this.guna2HtmlLabel23.Size = new System.Drawing.Size(111, 26);
             this.guna2HtmlLabel23.TabIndex = 9;
             this.guna2HtmlLabel23.Text = "Vista previa ";
             // 
@@ -904,9 +944,10 @@
             this.btnVistaPreviaBoleta.FillColor = System.Drawing.Color.Khaki;
             this.btnVistaPreviaBoleta.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.btnVistaPreviaBoleta.ForeColor = System.Drawing.Color.White;
-            this.btnVistaPreviaBoleta.Location = new System.Drawing.Point(205, 636);
+            this.btnVistaPreviaBoleta.Location = new System.Drawing.Point(273, 783);
+            this.btnVistaPreviaBoleta.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnVistaPreviaBoleta.Name = "btnVistaPreviaBoleta";
-            this.btnVistaPreviaBoleta.Size = new System.Drawing.Size(158, 76);
+            this.btnVistaPreviaBoleta.Size = new System.Drawing.Size(211, 94);
             this.btnVistaPreviaBoleta.TabIndex = 7;
             this.btnVistaPreviaBoleta.Click += new System.EventHandler(this.btnVistaPreviaBoleta_Click_1);
             // 
@@ -921,9 +962,10 @@
             this.btnImprimirBoleta.FillColor = System.Drawing.Color.Gold;
             this.btnImprimirBoleta.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.btnImprimirBoleta.ForeColor = System.Drawing.Color.White;
-            this.btnImprimirBoleta.Location = new System.Drawing.Point(22, 718);
+            this.btnImprimirBoleta.Location = new System.Drawing.Point(29, 884);
+            this.btnImprimirBoleta.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnImprimirBoleta.Name = "btnImprimirBoleta";
-            this.btnImprimirBoleta.Size = new System.Drawing.Size(159, 75);
+            this.btnImprimirBoleta.Size = new System.Drawing.Size(212, 92);
             this.btnImprimirBoleta.TabIndex = 6;
             this.btnImprimirBoleta.Click += new System.EventHandler(this.btnImprimirBoleta_Click);
             // 
@@ -938,9 +980,10 @@
             this.btnCancelarBoleta.FillColor = System.Drawing.Color.Red;
             this.btnCancelarBoleta.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.btnCancelarBoleta.ForeColor = System.Drawing.Color.White;
-            this.btnCancelarBoleta.Location = new System.Drawing.Point(22, 636);
+            this.btnCancelarBoleta.Location = new System.Drawing.Point(29, 783);
+            this.btnCancelarBoleta.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnCancelarBoleta.Name = "btnCancelarBoleta";
-            this.btnCancelarBoleta.Size = new System.Drawing.Size(159, 76);
+            this.btnCancelarBoleta.Size = new System.Drawing.Size(212, 94);
             this.btnCancelarBoleta.TabIndex = 5;
             this.btnCancelarBoleta.Click += new System.EventHandler(this.btnCancelarBoleta_Click);
             // 
@@ -950,9 +993,10 @@
             this.guna2PictureBox8.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox8.Image")));
             this.guna2PictureBox8.ImageRotate = 0F;
             this.guna2PictureBox8.InitialImage = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox8.InitialImage")));
-            this.guna2PictureBox8.Location = new System.Drawing.Point(11, 5);
+            this.guna2PictureBox8.Location = new System.Drawing.Point(15, 6);
+            this.guna2PictureBox8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2PictureBox8.Name = "guna2PictureBox8";
-            this.guna2PictureBox8.Size = new System.Drawing.Size(28, 32);
+            this.guna2PictureBox8.Size = new System.Drawing.Size(37, 39);
             this.guna2PictureBox8.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.guna2PictureBox8.TabIndex = 4;
             this.guna2PictureBox8.TabStop = false;
@@ -961,9 +1005,10 @@
             // 
             this.guna2HtmlLabel28.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel28.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel28.Location = new System.Drawing.Point(48, 9);
+            this.guna2HtmlLabel28.Location = new System.Drawing.Point(64, 11);
+            this.guna2HtmlLabel28.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel28.Name = "guna2HtmlLabel28";
-            this.guna2HtmlLabel28.Size = new System.Drawing.Size(219, 26);
+            this.guna2HtmlLabel28.Size = new System.Drawing.Size(274, 31);
             this.guna2HtmlLabel28.TabIndex = 4;
             this.guna2HtmlLabel28.Text = "Información del Pedido";
             // 
@@ -975,9 +1020,10 @@
             this.guna2Panel6.Controls.Add(this.guna2PictureBox5);
             this.guna2Panel6.Controls.Add(this.guna2HtmlLabel13);
             this.guna2Panel6.FillColor = System.Drawing.Color.White;
-            this.guna2Panel6.Location = new System.Drawing.Point(383, 9);
+            this.guna2Panel6.Location = new System.Drawing.Point(511, 11);
+            this.guna2Panel6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Panel6.Name = "guna2Panel6";
-            this.guna2Panel6.Size = new System.Drawing.Size(530, 841);
+            this.guna2Panel6.Size = new System.Drawing.Size(707, 1035);
             this.guna2Panel6.TabIndex = 1;
             // 
             // flowLayoutPanel1
@@ -990,9 +1036,10 @@
             this.flowLayoutPanel1.Controls.Add(this.guna2Panel10);
             this.flowLayoutPanel1.Controls.Add(this.guna2Panel11);
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(51, 50);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(68, 62);
+            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(440, 760);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(587, 935);
             this.flowLayoutPanel1.TabIndex = 7;
             this.flowLayoutPanel1.WrapContents = false;
             // 
@@ -1005,18 +1052,20 @@
             this.guna2Panel8.Controls.Add(this.guna2HtmlLabel16);
             this.guna2Panel8.Controls.Add(this.guna2HtmlLabel15);
             this.guna2Panel8.FillColor = System.Drawing.Color.White;
-            this.guna2Panel8.Location = new System.Drawing.Point(3, 3);
+            this.guna2Panel8.Location = new System.Drawing.Point(4, 4);
+            this.guna2Panel8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Panel8.Name = "guna2Panel8";
-            this.guna2Panel8.Size = new System.Drawing.Size(411, 218);
+            this.guna2Panel8.Size = new System.Drawing.Size(548, 268);
             this.guna2Panel8.TabIndex = 0;
             // 
             // guna2HtmlLabel17
             // 
             this.guna2HtmlLabel17.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel17.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel17.Location = new System.Drawing.Point(150, 194);
+            this.guna2HtmlLabel17.Location = new System.Drawing.Point(200, 239);
+            this.guna2HtmlLabel17.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel17.Name = "guna2HtmlLabel17";
-            this.guna2HtmlLabel17.Size = new System.Drawing.Size(111, 20);
+            this.guna2HtmlLabel17.Size = new System.Drawing.Size(140, 26);
             this.guna2HtmlLabel17.TabIndex = 39;
             this.guna2HtmlLabel17.Text = "Tel: 987 654 321";
             // 
@@ -1024,9 +1073,10 @@
             // 
             this.guna2PictureBox7.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox7.Image")));
             this.guna2PictureBox7.ImageRotate = 0F;
-            this.guna2PictureBox7.Location = new System.Drawing.Point(107, 13);
+            this.guna2PictureBox7.Location = new System.Drawing.Point(143, 16);
+            this.guna2PictureBox7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2PictureBox7.Name = "guna2PictureBox7";
-            this.guna2PictureBox7.Size = new System.Drawing.Size(222, 110);
+            this.guna2PictureBox7.Size = new System.Drawing.Size(296, 135);
             this.guna2PictureBox7.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.guna2PictureBox7.TabIndex = 36;
             this.guna2PictureBox7.TabStop = false;
@@ -1035,9 +1085,10 @@
             // 
             this.guna2HtmlLabel14.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel14.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel14.Location = new System.Drawing.Point(95, 129);
+            this.guna2HtmlLabel14.Location = new System.Drawing.Point(127, 159);
+            this.guna2HtmlLabel14.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel14.Name = "guna2HtmlLabel14";
-            this.guna2HtmlLabel14.Size = new System.Drawing.Size(262, 26);
+            this.guna2HtmlLabel14.Size = new System.Drawing.Size(326, 31);
             this.guna2HtmlLabel14.TabIndex = 35;
             this.guna2HtmlLabel14.Text = "AL ESTILO PIURANO S.A.C";
             // 
@@ -1045,9 +1096,10 @@
             // 
             this.guna2HtmlLabel16.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel16.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel16.Location = new System.Drawing.Point(107, 174);
+            this.guna2HtmlLabel16.Location = new System.Drawing.Point(143, 214);
+            this.guna2HtmlLabel16.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel16.Name = "guna2HtmlLabel16";
-            this.guna2HtmlLabel16.Size = new System.Drawing.Size(202, 20);
+            this.guna2HtmlLabel16.Size = new System.Drawing.Size(259, 26);
             this.guna2HtmlLabel16.TabIndex = 38;
             this.guna2HtmlLabel16.Text = "Av. Principal 123 Trujillo - Perú";
             // 
@@ -1055,9 +1107,10 @@
             // 
             this.guna2HtmlLabel15.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel15.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel15.Location = new System.Drawing.Point(144, 153);
+            this.guna2HtmlLabel15.Location = new System.Drawing.Point(192, 188);
+            this.guna2HtmlLabel15.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel15.Name = "guna2HtmlLabel15";
-            this.guna2HtmlLabel15.Size = new System.Drawing.Size(132, 20);
+            this.guna2HtmlLabel15.Size = new System.Drawing.Size(162, 26);
             this.guna2HtmlLabel15.TabIndex = 37;
             this.guna2HtmlLabel15.Text = "RUC: 20601234567";
             // 
@@ -1078,18 +1131,20 @@
             this.guna2Panel9.Controls.Add(this.lblBoletaFecha);
             this.guna2Panel9.Controls.Add(this.lblBoletaNumero);
             this.guna2Panel9.FillColor = System.Drawing.Color.White;
-            this.guna2Panel9.Location = new System.Drawing.Point(3, 227);
+            this.guna2Panel9.Location = new System.Drawing.Point(4, 280);
+            this.guna2Panel9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Panel9.Name = "guna2Panel9";
-            this.guna2Panel9.Size = new System.Drawing.Size(411, 178);
+            this.guna2Panel9.Size = new System.Drawing.Size(548, 219);
             this.guna2Panel9.TabIndex = 40;
             // 
             // guna2HtmlLabel35
             // 
             this.guna2HtmlLabel35.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel35.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel35.Location = new System.Drawing.Point(10, 155);
+            this.guna2HtmlLabel35.Location = new System.Drawing.Point(13, 191);
+            this.guna2HtmlLabel35.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel35.Name = "guna2HtmlLabel35";
-            this.guna2HtmlLabel35.Size = new System.Drawing.Size(398, 20);
+            this.guna2HtmlLabel35.Size = new System.Drawing.Size(477, 26);
             this.guna2HtmlLabel35.TabIndex = 50;
             this.guna2HtmlLabel35.Text = "-------------------------------------------------------------------------------";
             // 
@@ -1097,9 +1152,10 @@
             // 
             this.guna2HtmlLabel18.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel18.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel18.Location = new System.Drawing.Point(5, 3);
+            this.guna2HtmlLabel18.Location = new System.Drawing.Point(7, 4);
+            this.guna2HtmlLabel18.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel18.Name = "guna2HtmlLabel18";
-            this.guna2HtmlLabel18.Size = new System.Drawing.Size(388, 20);
+            this.guna2HtmlLabel18.Size = new System.Drawing.Size(465, 26);
             this.guna2HtmlLabel18.TabIndex = 49;
             this.guna2HtmlLabel18.Text = "-----------------------------------------------------------------------------";
             // 
@@ -1107,9 +1163,10 @@
             // 
             this.lblBoletaAtendidoPor.BackColor = System.Drawing.Color.Transparent;
             this.lblBoletaAtendidoPor.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblBoletaAtendidoPor.Location = new System.Drawing.Point(122, 130);
+            this.lblBoletaAtendidoPor.Location = new System.Drawing.Point(163, 160);
+            this.lblBoletaAtendidoPor.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblBoletaAtendidoPor.Name = "lblBoletaAtendidoPor";
-            this.lblBoletaAtendidoPor.Size = new System.Drawing.Size(94, 20);
+            this.lblBoletaAtendidoPor.Size = new System.Drawing.Size(119, 26);
             this.lblBoletaAtendidoPor.TabIndex = 47;
             this.lblBoletaAtendidoPor.Text = "Administrador";
             // 
@@ -1117,9 +1174,10 @@
             // 
             this.guna2HtmlLabel33.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel33.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel33.Location = new System.Drawing.Point(13, 130);
+            this.guna2HtmlLabel33.Location = new System.Drawing.Point(17, 160);
+            this.guna2HtmlLabel33.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel33.Name = "guna2HtmlLabel33";
-            this.guna2HtmlLabel33.Size = new System.Drawing.Size(90, 20);
+            this.guna2HtmlLabel33.Size = new System.Drawing.Size(117, 26);
             this.guna2HtmlLabel33.TabIndex = 46;
             this.guna2HtmlLabel33.Text = "Atendido por:";
             // 
@@ -1127,9 +1185,10 @@
             // 
             this.lblBoletaCanal.BackColor = System.Drawing.Color.Transparent;
             this.lblBoletaCanal.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblBoletaCanal.Location = new System.Drawing.Point(180, 108);
+            this.lblBoletaCanal.Location = new System.Drawing.Point(240, 133);
+            this.lblBoletaCanal.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblBoletaCanal.Name = "lblBoletaCanal";
-            this.lblBoletaCanal.Size = new System.Drawing.Size(39, 20);
+            this.lblBoletaCanal.Size = new System.Drawing.Size(48, 26);
             this.lblBoletaCanal.TabIndex = 45;
             this.lblBoletaCanal.Text = "salón";
             // 
@@ -1137,9 +1196,10 @@
             // 
             this.guna2HtmlLabel31.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel31.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel31.Location = new System.Drawing.Point(124, 108);
+            this.guna2HtmlLabel31.Location = new System.Drawing.Point(165, 133);
+            this.guna2HtmlLabel31.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel31.Name = "guna2HtmlLabel31";
-            this.guna2HtmlLabel31.Size = new System.Drawing.Size(42, 20);
+            this.guna2HtmlLabel31.Size = new System.Drawing.Size(53, 26);
             this.guna2HtmlLabel31.TabIndex = 44;
             this.guna2HtmlLabel31.Text = "canal:";
             // 
@@ -1147,9 +1207,10 @@
             // 
             this.guna2HtmlLabel25.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel25.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel25.Location = new System.Drawing.Point(110, 108);
+            this.guna2HtmlLabel25.Location = new System.Drawing.Point(147, 133);
+            this.guna2HtmlLabel25.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel25.Name = "guna2HtmlLabel25";
-            this.guna2HtmlLabel25.Size = new System.Drawing.Size(8, 20);
+            this.guna2HtmlLabel25.Size = new System.Drawing.Size(7, 26);
             this.guna2HtmlLabel25.TabIndex = 43;
             this.guna2HtmlLabel25.Text = "|";
             // 
@@ -1157,9 +1218,10 @@
             // 
             this.guna2HtmlLabel26.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel26.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel26.Location = new System.Drawing.Point(13, 108);
+            this.guna2HtmlLabel26.Location = new System.Drawing.Point(17, 133);
+            this.guna2HtmlLabel26.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel26.Name = "guna2HtmlLabel26";
-            this.guna2HtmlLabel26.Size = new System.Drawing.Size(48, 20);
+            this.guna2HtmlLabel26.Size = new System.Drawing.Size(59, 26);
             this.guna2HtmlLabel26.TabIndex = 42;
             this.guna2HtmlLabel26.Text = "Mesa : ";
             // 
@@ -1167,9 +1229,10 @@
             // 
             this.lblBoletaMesa.BackColor = System.Drawing.Color.Transparent;
             this.lblBoletaMesa.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblBoletaMesa.Location = new System.Drawing.Point(86, 108);
+            this.lblBoletaMesa.Location = new System.Drawing.Point(115, 133);
+            this.lblBoletaMesa.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblBoletaMesa.Name = "lblBoletaMesa";
-            this.lblBoletaMesa.Size = new System.Drawing.Size(11, 20);
+            this.lblBoletaMesa.Size = new System.Drawing.Size(13, 26);
             this.lblBoletaMesa.TabIndex = 41;
             this.lblBoletaMesa.Text = "1";
             // 
@@ -1177,9 +1240,10 @@
             // 
             this.lblBoletaHora.BackColor = System.Drawing.Color.Transparent;
             this.lblBoletaHora.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblBoletaHora.Location = new System.Drawing.Point(180, 89);
+            this.lblBoletaHora.Location = new System.Drawing.Point(240, 110);
+            this.lblBoletaHora.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblBoletaHora.Name = "lblBoletaHora";
-            this.lblBoletaHora.Size = new System.Drawing.Size(39, 20);
+            this.lblBoletaHora.Size = new System.Drawing.Size(48, 26);
             this.lblBoletaHora.TabIndex = 40;
             this.lblBoletaHora.Text = "10:34\n";
             // 
@@ -1187,9 +1251,10 @@
             // 
             this.guna2HtmlLabel19.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel19.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel19.Location = new System.Drawing.Point(13, 89);
+            this.guna2HtmlLabel19.Location = new System.Drawing.Point(17, 110);
+            this.guna2HtmlLabel19.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel19.Name = "guna2HtmlLabel19";
-            this.guna2HtmlLabel19.Size = new System.Drawing.Size(48, 20);
+            this.guna2HtmlLabel19.Size = new System.Drawing.Size(62, 26);
             this.guna2HtmlLabel19.TabIndex = 39;
             this.guna2HtmlLabel19.Text = "Fecha: ";
             // 
@@ -1197,9 +1262,10 @@
             // 
             this.guna2HtmlLabel20.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel20.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel20.Location = new System.Drawing.Point(48, 35);
+            this.guna2HtmlLabel20.Location = new System.Drawing.Point(64, 43);
+            this.guna2HtmlLabel20.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel20.Name = "guna2HtmlLabel20";
-            this.guna2HtmlLabel20.Size = new System.Drawing.Size(344, 26);
+            this.guna2HtmlLabel20.Size = new System.Drawing.Size(426, 31);
             this.guna2HtmlLabel20.TabIndex = 35;
             this.guna2HtmlLabel20.Text = "  BOLETA DE VENTA ELECTRÓNICA";
             // 
@@ -1207,9 +1273,10 @@
             // 
             this.lblBoletaFecha.BackColor = System.Drawing.Color.Transparent;
             this.lblBoletaFecha.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblBoletaFecha.Location = new System.Drawing.Point(86, 89);
+            this.lblBoletaFecha.Location = new System.Drawing.Point(115, 110);
+            this.lblBoletaFecha.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblBoletaFecha.Name = "lblBoletaFecha";
-            this.lblBoletaFecha.Size = new System.Drawing.Size(75, 20);
+            this.lblBoletaFecha.Size = new System.Drawing.Size(93, 26);
             this.lblBoletaFecha.TabIndex = 38;
             this.lblBoletaFecha.Text = "21/10/2026 ";
             // 
@@ -1217,9 +1284,10 @@
             // 
             this.lblBoletaNumero.BackColor = System.Drawing.Color.Transparent;
             this.lblBoletaNumero.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblBoletaNumero.Location = new System.Drawing.Point(147, 61);
+            this.lblBoletaNumero.Location = new System.Drawing.Point(196, 75);
+            this.lblBoletaNumero.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblBoletaNumero.Name = "lblBoletaNumero";
-            this.lblBoletaNumero.Size = new System.Drawing.Size(129, 20);
+            this.lblBoletaNumero.Size = new System.Drawing.Size(156, 26);
             this.lblBoletaNumero.TabIndex = 37;
             this.lblBoletaNumero.Text = " B001 - 00001234";
             // 
@@ -1255,7 +1323,8 @@
             dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgvBoletaDetalle.DefaultCellStyle = dataGridViewCellStyle3;
             this.dgvBoletaDetalle.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(229)))), ((int)(((byte)(255)))));
-            this.dgvBoletaDetalle.Location = new System.Drawing.Point(3, 411);
+            this.dgvBoletaDetalle.Location = new System.Drawing.Point(4, 507);
+            this.dgvBoletaDetalle.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dgvBoletaDetalle.Name = "dgvBoletaDetalle";
             dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Control;
@@ -1267,7 +1336,7 @@
             this.dgvBoletaDetalle.RowHeadersDefaultCellStyle = dataGridViewCellStyle4;
             this.dgvBoletaDetalle.RowHeadersVisible = false;
             this.dgvBoletaDetalle.RowHeadersWidth = 51;
-            this.dgvBoletaDetalle.Size = new System.Drawing.Size(411, 237);
+            this.dgvBoletaDetalle.Size = new System.Drawing.Size(548, 292);
             this.dgvBoletaDetalle.TabIndex = 40;
             this.dgvBoletaDetalle.ThemeStyle.AlternatingRowsStyle.BackColor = System.Drawing.Color.White;
             this.dgvBoletaDetalle.ThemeStyle.AlternatingRowsStyle.ForeColor = System.Drawing.Color.Black;
@@ -1317,18 +1386,20 @@
             this.guna2Panel10.Controls.Add(this.lblBoletaSubtotal);
             this.guna2Panel10.Controls.Add(this.guna2HtmlLabel51);
             this.guna2Panel10.FillColor = System.Drawing.Color.White;
-            this.guna2Panel10.Location = new System.Drawing.Point(3, 654);
+            this.guna2Panel10.Location = new System.Drawing.Point(4, 807);
+            this.guna2Panel10.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Panel10.Name = "guna2Panel10";
-            this.guna2Panel10.Size = new System.Drawing.Size(411, 147);
+            this.guna2Panel10.Size = new System.Drawing.Size(548, 181);
             this.guna2Panel10.TabIndex = 51;
             // 
             // guna2HtmlLabel54
             // 
             this.guna2HtmlLabel54.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel54.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel54.Location = new System.Drawing.Point(3, 122);
+            this.guna2HtmlLabel54.Location = new System.Drawing.Point(4, 150);
+            this.guna2HtmlLabel54.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel54.Name = "guna2HtmlLabel54";
-            this.guna2HtmlLabel54.Size = new System.Drawing.Size(398, 20);
+            this.guna2HtmlLabel54.Size = new System.Drawing.Size(477, 26);
             this.guna2HtmlLabel54.TabIndex = 55;
             this.guna2HtmlLabel54.Text = "-------------------------------------------------------------------------------";
             // 
@@ -1336,9 +1407,10 @@
             // 
             this.lblBoletaTotal.BackColor = System.Drawing.Color.Transparent;
             this.lblBoletaTotal.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblBoletaTotal.Location = new System.Drawing.Point(345, 96);
+            this.lblBoletaTotal.Location = new System.Drawing.Point(460, 118);
+            this.lblBoletaTotal.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblBoletaTotal.Name = "lblBoletaTotal";
-            this.lblBoletaTotal.Size = new System.Drawing.Size(53, 20);
+            this.lblBoletaTotal.Size = new System.Drawing.Size(65, 26);
             this.lblBoletaTotal.TabIndex = 54;
             this.lblBoletaTotal.Text = "S/00.00";
             // 
@@ -1346,9 +1418,10 @@
             // 
             this.guna2HtmlLabel52.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel52.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel52.Location = new System.Drawing.Point(11, 96);
+            this.guna2HtmlLabel52.Location = new System.Drawing.Point(15, 118);
+            this.guna2HtmlLabel52.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel52.Name = "guna2HtmlLabel52";
-            this.guna2HtmlLabel52.Size = new System.Drawing.Size(70, 27);
+            this.guna2HtmlLabel52.Size = new System.Drawing.Size(81, 32);
             this.guna2HtmlLabel52.TabIndex = 53;
             this.guna2HtmlLabel52.Text = "Total :";
             // 
@@ -1356,9 +1429,10 @@
             // 
             this.guna2HtmlLabel40.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel40.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel40.Location = new System.Drawing.Point(5, 79);
+            this.guna2HtmlLabel40.Location = new System.Drawing.Point(7, 97);
+            this.guna2HtmlLabel40.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel40.Name = "guna2HtmlLabel40";
-            this.guna2HtmlLabel40.Size = new System.Drawing.Size(398, 20);
+            this.guna2HtmlLabel40.Size = new System.Drawing.Size(477, 26);
             this.guna2HtmlLabel40.TabIndex = 52;
             this.guna2HtmlLabel40.Text = "-------------------------------------------------------------------------------";
             // 
@@ -1366,9 +1440,10 @@
             // 
             this.lblBoletaIGV.BackColor = System.Drawing.Color.Transparent;
             this.lblBoletaIGV.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblBoletaIGV.Location = new System.Drawing.Point(345, 55);
+            this.lblBoletaIGV.Location = new System.Drawing.Point(460, 68);
+            this.lblBoletaIGV.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblBoletaIGV.Name = "lblBoletaIGV";
-            this.lblBoletaIGV.Size = new System.Drawing.Size(53, 20);
+            this.lblBoletaIGV.Size = new System.Drawing.Size(65, 26);
             this.lblBoletaIGV.TabIndex = 51;
             this.lblBoletaIGV.Text = "S/00.00";
             // 
@@ -1376,19 +1451,21 @@
             // 
             this.guna2HtmlLabel36.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel36.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel36.Location = new System.Drawing.Point(13, 55);
+            this.guna2HtmlLabel36.Location = new System.Drawing.Point(17, 68);
+            this.guna2HtmlLabel36.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel36.Name = "guna2HtmlLabel36";
-            this.guna2HtmlLabel36.Size = new System.Drawing.Size(79, 20);
+            this.guna2HtmlLabel36.Size = new System.Drawing.Size(95, 26);
             this.guna2HtmlLabel36.TabIndex = 50;
-            this.guna2HtmlLabel36.Text = "IGV(18%):    ";
+            this.guna2HtmlLabel36.Text = "IGV(10%):    ";
             // 
             // guna2HtmlLabel38
             // 
             this.guna2HtmlLabel38.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel38.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel38.Location = new System.Drawing.Point(5, 3);
+            this.guna2HtmlLabel38.Location = new System.Drawing.Point(7, 4);
+            this.guna2HtmlLabel38.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel38.Name = "guna2HtmlLabel38";
-            this.guna2HtmlLabel38.Size = new System.Drawing.Size(393, 20);
+            this.guna2HtmlLabel38.Size = new System.Drawing.Size(471, 26);
             this.guna2HtmlLabel38.TabIndex = 49;
             this.guna2HtmlLabel38.Text = "------------------------------------------------------------------------------";
             // 
@@ -1396,9 +1473,10 @@
             // 
             this.lblBoletaSubtotal.BackColor = System.Drawing.Color.Transparent;
             this.lblBoletaSubtotal.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblBoletaSubtotal.Location = new System.Drawing.Point(345, 29);
+            this.lblBoletaSubtotal.Location = new System.Drawing.Point(460, 36);
+            this.lblBoletaSubtotal.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblBoletaSubtotal.Name = "lblBoletaSubtotal";
-            this.lblBoletaSubtotal.Size = new System.Drawing.Size(53, 20);
+            this.lblBoletaSubtotal.Size = new System.Drawing.Size(65, 26);
             this.lblBoletaSubtotal.TabIndex = 48;
             this.lblBoletaSubtotal.Text = "S/90.00";
             // 
@@ -1406,9 +1484,10 @@
             // 
             this.guna2HtmlLabel51.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel51.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel51.Location = new System.Drawing.Point(13, 29);
+            this.guna2HtmlLabel51.Location = new System.Drawing.Point(17, 36);
+            this.guna2HtmlLabel51.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel51.Name = "guna2HtmlLabel51";
-            this.guna2HtmlLabel51.Size = new System.Drawing.Size(75, 20);
+            this.guna2HtmlLabel51.Size = new System.Drawing.Size(90, 26);
             this.guna2HtmlLabel51.TabIndex = 37;
             this.guna2HtmlLabel51.Text = "Subtotal :   ";
             // 
@@ -1423,18 +1502,20 @@
             this.guna2Panel11.Controls.Add(this.lblBoletaFormaPago);
             this.guna2Panel11.Controls.Add(this.guna2HtmlLabel50);
             this.guna2Panel11.FillColor = System.Drawing.Color.White;
-            this.guna2Panel11.Location = new System.Drawing.Point(3, 807);
+            this.guna2Panel11.Location = new System.Drawing.Point(4, 996);
+            this.guna2Panel11.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Panel11.Name = "guna2Panel11";
-            this.guna2Panel11.Size = new System.Drawing.Size(411, 403);
+            this.guna2Panel11.Size = new System.Drawing.Size(548, 496);
             this.guna2Panel11.TabIndex = 53;
             // 
             // guna2HtmlLabel56
             // 
             this.guna2HtmlLabel56.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel56.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel56.Location = new System.Drawing.Point(112, 372);
+            this.guna2HtmlLabel56.Location = new System.Drawing.Point(149, 458);
+            this.guna2HtmlLabel56.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel56.Name = "guna2HtmlLabel56";
-            this.guna2HtmlLabel56.Size = new System.Drawing.Size(169, 20);
+            this.guna2HtmlLabel56.Size = new System.Drawing.Size(214, 26);
             this.guna2HtmlLabel56.TabIndex = 57;
             this.guna2HtmlLabel56.Text = "Autorizado por la SUNAT";
             // 
@@ -1442,27 +1523,30 @@
             // 
             this.lblBoletaCodigoFinal.BackColor = System.Drawing.Color.Transparent;
             this.lblBoletaCodigoFinal.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblBoletaCodigoFinal.Location = new System.Drawing.Point(150, 351);
+            this.lblBoletaCodigoFinal.Location = new System.Drawing.Point(200, 432);
+            this.lblBoletaCodigoFinal.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblBoletaCodigoFinal.Name = "lblBoletaCodigoFinal";
-            this.lblBoletaCodigoFinal.Size = new System.Drawing.Size(101, 20);
+            this.lblBoletaCodigoFinal.Size = new System.Drawing.Size(125, 26);
             this.lblBoletaCodigoFinal.TabIndex = 56;
             this.lblBoletaCodigoFinal.Text = "B00100001234";
             // 
             // picCodigoBarrasBoleta
             // 
             this.picCodigoBarrasBoleta.ImageRotate = 0F;
-            this.picCodigoBarrasBoleta.Location = new System.Drawing.Point(31, 259);
+            this.picCodigoBarrasBoleta.Location = new System.Drawing.Point(41, 319);
+            this.picCodigoBarrasBoleta.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.picCodigoBarrasBoleta.Name = "picCodigoBarrasBoleta";
-            this.picCodigoBarrasBoleta.Size = new System.Drawing.Size(339, 83);
+            this.picCodigoBarrasBoleta.Size = new System.Drawing.Size(452, 102);
             this.picCodigoBarrasBoleta.TabIndex = 56;
             this.picCodigoBarrasBoleta.TabStop = false;
             // 
             // picQRBoleta
             // 
             this.picQRBoleta.ImageRotate = 0F;
-            this.picQRBoleta.Location = new System.Drawing.Point(95, 78);
+            this.picQRBoleta.Location = new System.Drawing.Point(127, 96);
+            this.picQRBoleta.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.picQRBoleta.Name = "picQRBoleta";
-            this.picQRBoleta.Size = new System.Drawing.Size(214, 168);
+            this.picQRBoleta.Size = new System.Drawing.Size(285, 207);
             this.picQRBoleta.TabIndex = 55;
             this.picQRBoleta.TabStop = false;
             // 
@@ -1470,9 +1554,10 @@
             // 
             this.guna2HtmlLabel46.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel46.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel46.Location = new System.Drawing.Point(122, 54);
+            this.guna2HtmlLabel46.Location = new System.Drawing.Point(163, 66);
+            this.guna2HtmlLabel46.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel46.Name = "guna2HtmlLabel46";
-            this.guna2HtmlLabel46.Size = new System.Drawing.Size(159, 18);
+            this.guna2HtmlLabel46.Size = new System.Drawing.Size(187, 22);
             this.guna2HtmlLabel46.TabIndex = 54;
             this.guna2HtmlLabel46.Text = "¡Sabor que te encanta!";
             // 
@@ -1480,9 +1565,10 @@
             // 
             this.guna2HtmlLabel34.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel34.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel34.Location = new System.Drawing.Point(110, 33);
+            this.guna2HtmlLabel34.Location = new System.Drawing.Point(147, 41);
+            this.guna2HtmlLabel34.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel34.Name = "guna2HtmlLabel34";
-            this.guna2HtmlLabel34.Size = new System.Drawing.Size(195, 18);
+            this.guna2HtmlLabel34.Size = new System.Drawing.Size(226, 22);
             this.guna2HtmlLabel34.TabIndex = 53;
             this.guna2HtmlLabel34.Text = "¡Gracias por su preferencia!";
             // 
@@ -1490,9 +1576,10 @@
             // 
             this.lblBoletaFormaPago.BackColor = System.Drawing.Color.Transparent;
             this.lblBoletaFormaPago.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblBoletaFormaPago.Location = new System.Drawing.Point(147, 7);
+            this.lblBoletaFormaPago.Location = new System.Drawing.Point(196, 9);
+            this.lblBoletaFormaPago.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblBoletaFormaPago.Name = "lblBoletaFormaPago";
-            this.lblBoletaFormaPago.Size = new System.Drawing.Size(56, 20);
+            this.lblBoletaFormaPago.Size = new System.Drawing.Size(69, 26);
             this.lblBoletaFormaPago.TabIndex = 51;
             this.lblBoletaFormaPago.Text = "Efectivo";
             // 
@@ -1500,9 +1587,10 @@
             // 
             this.guna2HtmlLabel50.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel50.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel50.Location = new System.Drawing.Point(10, 7);
+            this.guna2HtmlLabel50.Location = new System.Drawing.Point(13, 9);
+            this.guna2HtmlLabel50.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel50.Name = "guna2HtmlLabel50";
-            this.guna2HtmlLabel50.Size = new System.Drawing.Size(117, 18);
+            this.guna2HtmlLabel50.Size = new System.Drawing.Size(134, 22);
             this.guna2HtmlLabel50.TabIndex = 37;
             this.guna2HtmlLabel50.Text = "Forma de pago : ";
             // 
@@ -1512,9 +1600,10 @@
             this.guna2PictureBox5.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox5.Image")));
             this.guna2PictureBox5.ImageRotate = 0F;
             this.guna2PictureBox5.InitialImage = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox5.InitialImage")));
-            this.guna2PictureBox5.Location = new System.Drawing.Point(14, 8);
+            this.guna2PictureBox5.Location = new System.Drawing.Point(19, 10);
+            this.guna2PictureBox5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2PictureBox5.Name = "guna2PictureBox5";
-            this.guna2PictureBox5.Size = new System.Drawing.Size(28, 32);
+            this.guna2PictureBox5.Size = new System.Drawing.Size(37, 39);
             this.guna2PictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.guna2PictureBox5.TabIndex = 5;
             this.guna2PictureBox5.TabStop = false;
@@ -1523,9 +1612,10 @@
             // 
             this.guna2HtmlLabel13.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel13.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel13.Location = new System.Drawing.Point(51, 12);
+            this.guna2HtmlLabel13.Location = new System.Drawing.Point(68, 15);
+            this.guna2HtmlLabel13.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel13.Name = "guna2HtmlLabel13";
-            this.guna2HtmlLabel13.Size = new System.Drawing.Size(228, 26);
+            this.guna2HtmlLabel13.Size = new System.Drawing.Size(288, 31);
             this.guna2HtmlLabel13.TabIndex = 6;
             this.guna2HtmlLabel13.Text = "Vista Previa de la Boleta ";
             // 
@@ -1556,18 +1646,20 @@
             this.guna2Panel3.Controls.Add(this.guna2HtmlLabel4);
             this.guna2Panel3.Controls.Add(this.guna2HtmlLabel3);
             this.guna2Panel3.FillColor = System.Drawing.Color.WhiteSmoke;
-            this.guna2Panel3.Location = new System.Drawing.Point(9, 10);
+            this.guna2Panel3.Location = new System.Drawing.Point(12, 12);
+            this.guna2Panel3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Panel3.Name = "guna2Panel3";
-            this.guna2Panel3.Size = new System.Drawing.Size(368, 795);
+            this.guna2Panel3.Size = new System.Drawing.Size(491, 978);
             this.guna2Panel3.TabIndex = 0;
             // 
             // lblValorAtendido
             // 
             this.lblValorAtendido.BackColor = System.Drawing.Color.Transparent;
             this.lblValorAtendido.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblValorAtendido.Location = new System.Drawing.Point(159, 161);
+            this.lblValorAtendido.Location = new System.Drawing.Point(212, 198);
+            this.lblValorAtendido.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblValorAtendido.Name = "lblValorAtendido";
-            this.lblValorAtendido.Size = new System.Drawing.Size(75, 17);
+            this.lblValorAtendido.Size = new System.Drawing.Size(90, 20);
             this.lblValorAtendido.TabIndex = 39;
             this.lblValorAtendido.Text = "Atendido por:";
             // 
@@ -1575,9 +1667,10 @@
             // 
             this.lblValorFecha.BackColor = System.Drawing.Color.Transparent;
             this.lblValorFecha.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblValorFecha.Location = new System.Drawing.Point(159, 133);
+            this.lblValorFecha.Location = new System.Drawing.Point(212, 164);
+            this.lblValorFecha.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblValorFecha.Name = "lblValorFecha";
-            this.lblValorFecha.Size = new System.Drawing.Size(78, 17);
+            this.lblValorFecha.Size = new System.Drawing.Size(96, 20);
             this.lblValorFecha.TabIndex = 38;
             this.lblValorFecha.Text = "Fecha y Hora:";
             // 
@@ -1585,9 +1678,10 @@
             // 
             this.lblValorMesa.BackColor = System.Drawing.Color.Transparent;
             this.lblValorMesa.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblValorMesa.Location = new System.Drawing.Point(159, 105);
+            this.lblValorMesa.Location = new System.Drawing.Point(212, 129);
+            this.lblValorMesa.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblValorMesa.Name = "lblValorMesa";
-            this.lblValorMesa.Size = new System.Drawing.Size(37, 17);
+            this.lblValorMesa.Size = new System.Drawing.Size(44, 20);
             this.lblValorMesa.TabIndex = 37;
             this.lblValorMesa.Text = "Mesa:";
             // 
@@ -1595,9 +1689,10 @@
             // 
             this.lblValorTipo.BackColor = System.Drawing.Color.Transparent;
             this.lblValorTipo.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblValorTipo.Location = new System.Drawing.Point(159, 77);
+            this.lblValorTipo.Location = new System.Drawing.Point(212, 95);
+            this.lblValorTipo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblValorTipo.Name = "lblValorTipo";
-            this.lblValorTipo.Size = new System.Drawing.Size(88, 17);
+            this.lblValorTipo.Size = new System.Drawing.Size(104, 20);
             this.lblValorTipo.TabIndex = 36;
             this.lblValorTipo.Text = "Tipo de pedido:";
             // 
@@ -1605,9 +1700,10 @@
             // 
             this.lblValorPedido.BackColor = System.Drawing.Color.Transparent;
             this.lblValorPedido.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblValorPedido.Location = new System.Drawing.Point(159, 49);
+            this.lblValorPedido.Location = new System.Drawing.Point(212, 60);
+            this.lblValorPedido.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblValorPedido.Name = "lblValorPedido";
-            this.lblValorPedido.Size = new System.Drawing.Size(109, 17);
+            this.lblValorPedido.Size = new System.Drawing.Size(129, 20);
             this.lblValorPedido.TabIndex = 35;
             this.lblValorPedido.Text = "Número de pedido:";
             // 
@@ -1617,18 +1713,20 @@
             this.guna2Panel5.Controls.Add(this.guna2HtmlLabel12);
             this.guna2Panel5.Controls.Add(this.lblTotalBoleta);
             this.guna2Panel5.FillColor = System.Drawing.Color.Gold;
-            this.guna2Panel5.Location = new System.Drawing.Point(8, 745);
+            this.guna2Panel5.Location = new System.Drawing.Point(11, 917);
+            this.guna2Panel5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Panel5.Name = "guna2Panel5";
-            this.guna2Panel5.Size = new System.Drawing.Size(352, 41);
+            this.guna2Panel5.Size = new System.Drawing.Size(469, 50);
             this.guna2Panel5.TabIndex = 34;
             // 
             // guna2HtmlLabel12
             // 
             this.guna2HtmlLabel12.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel12.Font = new System.Drawing.Font("Arial Narrow", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel12.Location = new System.Drawing.Point(16, 12);
+            this.guna2HtmlLabel12.Location = new System.Drawing.Point(21, 15);
+            this.guna2HtmlLabel12.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel12.Name = "guna2HtmlLabel12";
-            this.guna2HtmlLabel12.Size = new System.Drawing.Size(50, 22);
+            this.guna2HtmlLabel12.Size = new System.Drawing.Size(62, 26);
             this.guna2HtmlLabel12.TabIndex = 60;
             this.guna2HtmlLabel12.Text = "TOTAL:";
             // 
@@ -1636,9 +1734,10 @@
             // 
             this.lblTotalBoleta.BackColor = System.Drawing.Color.Transparent;
             this.lblTotalBoleta.Font = new System.Drawing.Font("Arial Narrow", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTotalBoleta.Location = new System.Drawing.Point(283, 9);
+            this.lblTotalBoleta.Location = new System.Drawing.Point(377, 11);
+            this.lblTotalBoleta.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblTotalBoleta.Name = "lblTotalBoleta";
-            this.lblTotalBoleta.Size = new System.Drawing.Size(48, 25);
+            this.lblTotalBoleta.Size = new System.Drawing.Size(59, 31);
             this.lblTotalBoleta.TabIndex = 59;
             this.lblTotalBoleta.Text = "S/0.00";
             // 
@@ -1653,18 +1752,20 @@
             this.guna2Panel4.Controls.Add(this.lblSubtotalBoleta);
             this.guna2Panel4.Controls.Add(this.guna2HtmlLabel84);
             this.guna2Panel4.FillColor = System.Drawing.Color.White;
-            this.guna2Panel4.Location = new System.Drawing.Point(8, 646);
+            this.guna2Panel4.Location = new System.Drawing.Point(11, 795);
+            this.guna2Panel4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Panel4.Name = "guna2Panel4";
-            this.guna2Panel4.Size = new System.Drawing.Size(352, 93);
+            this.guna2Panel4.Size = new System.Drawing.Size(469, 114);
             this.guna2Panel4.TabIndex = 33;
             // 
             // lblIGVBoleta
             // 
             this.lblIGVBoleta.BackColor = System.Drawing.Color.Transparent;
             this.lblIGVBoleta.Font = new System.Drawing.Font("Arial Narrow", 11.25F, System.Drawing.FontStyle.Bold);
-            this.lblIGVBoleta.Location = new System.Drawing.Point(293, 64);
+            this.lblIGVBoleta.Location = new System.Drawing.Point(391, 79);
+            this.lblIGVBoleta.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblIGVBoleta.Name = "lblIGVBoleta";
-            this.lblIGVBoleta.Size = new System.Drawing.Size(38, 22);
+            this.lblIGVBoleta.Size = new System.Drawing.Size(48, 25);
             this.lblIGVBoleta.TabIndex = 58;
             this.lblIGVBoleta.Text = "S/0.00";
             // 
@@ -1672,9 +1773,10 @@
             // 
             this.guna2HtmlLabel82.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel82.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel82.Location = new System.Drawing.Point(8, 8);
+            this.guna2HtmlLabel82.Location = new System.Drawing.Point(11, 10);
+            this.guna2HtmlLabel82.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel82.Name = "guna2HtmlLabel82";
-            this.guna2HtmlLabel82.Size = new System.Drawing.Size(55, 18);
+            this.guna2HtmlLabel82.Size = new System.Drawing.Size(64, 20);
             this.guna2HtmlLabel82.TabIndex = 53;
             this.guna2HtmlLabel82.Text = "Subtotal:";
             // 
@@ -1682,9 +1784,10 @@
             // 
             this.lblDescuentoBoleta.BackColor = System.Drawing.Color.Transparent;
             this.lblDescuentoBoleta.Font = new System.Drawing.Font("Arial Narrow", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblDescuentoBoleta.Location = new System.Drawing.Point(293, 36);
+            this.lblDescuentoBoleta.Location = new System.Drawing.Point(391, 44);
+            this.lblDescuentoBoleta.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblDescuentoBoleta.Name = "lblDescuentoBoleta";
-            this.lblDescuentoBoleta.Size = new System.Drawing.Size(38, 22);
+            this.lblDescuentoBoleta.Size = new System.Drawing.Size(48, 25);
             this.lblDescuentoBoleta.TabIndex = 57;
             this.lblDescuentoBoleta.Text = "S/0.00";
             // 
@@ -1692,9 +1795,10 @@
             // 
             this.guna2HtmlLabel83.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel83.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel83.Location = new System.Drawing.Point(8, 36);
+            this.guna2HtmlLabel83.Location = new System.Drawing.Point(11, 44);
+            this.guna2HtmlLabel83.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel83.Name = "guna2HtmlLabel83";
-            this.guna2HtmlLabel83.Size = new System.Drawing.Size(69, 18);
+            this.guna2HtmlLabel83.Size = new System.Drawing.Size(82, 20);
             this.guna2HtmlLabel83.TabIndex = 54;
             this.guna2HtmlLabel83.Text = "Descuento:";
             // 
@@ -1702,9 +1806,10 @@
             // 
             this.lblSubtotalBoleta.BackColor = System.Drawing.Color.Transparent;
             this.lblSubtotalBoleta.Font = new System.Drawing.Font("Arial Narrow", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSubtotalBoleta.Location = new System.Drawing.Point(293, 8);
+            this.lblSubtotalBoleta.Location = new System.Drawing.Point(391, 10);
+            this.lblSubtotalBoleta.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lblSubtotalBoleta.Name = "lblSubtotalBoleta";
-            this.lblSubtotalBoleta.Size = new System.Drawing.Size(38, 22);
+            this.lblSubtotalBoleta.Size = new System.Drawing.Size(48, 25);
             this.lblSubtotalBoleta.TabIndex = 56;
             this.lblSubtotalBoleta.Text = "S/0.00";
             // 
@@ -1712,9 +1817,10 @@
             // 
             this.guna2HtmlLabel84.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel84.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel84.Location = new System.Drawing.Point(8, 66);
+            this.guna2HtmlLabel84.Location = new System.Drawing.Point(11, 81);
+            this.guna2HtmlLabel84.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel84.Name = "guna2HtmlLabel84";
-            this.guna2HtmlLabel84.Size = new System.Drawing.Size(63, 18);
+            this.guna2HtmlLabel84.Size = new System.Drawing.Size(75, 20);
             this.guna2HtmlLabel84.TabIndex = 55;
             this.guna2HtmlLabel84.Text = "IGV (18%)";
             // 
@@ -1750,7 +1856,8 @@
             dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgvDetallePedido.DefaultCellStyle = dataGridViewCellStyle7;
             this.dgvDetallePedido.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(229)))), ((int)(((byte)(255)))));
-            this.dgvDetallePedido.Location = new System.Drawing.Point(8, 400);
+            this.dgvDetallePedido.Location = new System.Drawing.Point(11, 492);
+            this.dgvDetallePedido.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dgvDetallePedido.Name = "dgvDetallePedido";
             dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle8.BackColor = System.Drawing.SystemColors.Control;
@@ -1762,7 +1869,7 @@
             this.dgvDetallePedido.RowHeadersDefaultCellStyle = dataGridViewCellStyle8;
             this.dgvDetallePedido.RowHeadersVisible = false;
             this.dgvDetallePedido.RowHeadersWidth = 51;
-            this.dgvDetallePedido.Size = new System.Drawing.Size(352, 237);
+            this.dgvDetallePedido.Size = new System.Drawing.Size(469, 292);
             this.dgvDetallePedido.TabIndex = 32;
             this.dgvDetallePedido.ThemeStyle.AlternatingRowsStyle.BackColor = System.Drawing.Color.White;
             this.dgvDetallePedido.ThemeStyle.AlternatingRowsStyle.ForeColor = System.Drawing.Color.Black;
@@ -1807,9 +1914,10 @@
             this.guna2PictureBox4.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox4.Image")));
             this.guna2PictureBox4.ImageRotate = 0F;
             this.guna2PictureBox4.InitialImage = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox4.InitialImage")));
-            this.guna2PictureBox4.Location = new System.Drawing.Point(7, 361);
+            this.guna2PictureBox4.Location = new System.Drawing.Point(9, 444);
+            this.guna2PictureBox4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2PictureBox4.Name = "guna2PictureBox4";
-            this.guna2PictureBox4.Size = new System.Drawing.Size(28, 32);
+            this.guna2PictureBox4.Size = new System.Drawing.Size(37, 39);
             this.guna2PictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.guna2PictureBox4.TabIndex = 31;
             this.guna2PictureBox4.TabStop = false;
@@ -1818,9 +1926,10 @@
             // 
             this.guna2HtmlLabel10.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel10.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel10.Location = new System.Drawing.Point(40, 364);
+            this.guna2HtmlLabel10.Location = new System.Drawing.Point(53, 448);
+            this.guna2HtmlLabel10.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel10.Name = "guna2HtmlLabel10";
-            this.guna2HtmlLabel10.Size = new System.Drawing.Size(174, 26);
+            this.guna2HtmlLabel10.Size = new System.Drawing.Size(221, 31);
             this.guna2HtmlLabel10.TabIndex = 30;
             this.guna2HtmlLabel10.Text = "Detalle del Pedido ";
             // 
@@ -1830,9 +1939,10 @@
             this.guna2PictureBox3.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox3.Image")));
             this.guna2PictureBox3.ImageRotate = 0F;
             this.guna2PictureBox3.InitialImage = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox3.InitialImage")));
-            this.guna2PictureBox3.Location = new System.Drawing.Point(7, 189);
+            this.guna2PictureBox3.Location = new System.Drawing.Point(9, 233);
+            this.guna2PictureBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2PictureBox3.Name = "guna2PictureBox3";
-            this.guna2PictureBox3.Size = new System.Drawing.Size(35, 32);
+            this.guna2PictureBox3.Size = new System.Drawing.Size(47, 39);
             this.guna2PictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.guna2PictureBox3.TabIndex = 29;
             this.guna2PictureBox3.TabStop = false;
@@ -1843,9 +1953,10 @@
             this.guna2PictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox2.Image")));
             this.guna2PictureBox2.ImageRotate = 0F;
             this.guna2PictureBox2.InitialImage = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox2.InitialImage")));
-            this.guna2PictureBox2.Location = new System.Drawing.Point(11, 5);
+            this.guna2PictureBox2.Location = new System.Drawing.Point(15, 6);
+            this.guna2PictureBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2PictureBox2.Name = "guna2PictureBox2";
-            this.guna2PictureBox2.Size = new System.Drawing.Size(28, 32);
+            this.guna2PictureBox2.Size = new System.Drawing.Size(37, 39);
             this.guna2PictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.guna2PictureBox2.TabIndex = 4;
             this.guna2PictureBox2.TabStop = false;
@@ -1864,12 +1975,12 @@
             this.txtCelularCliente.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.txtCelularCliente.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtCelularCliente.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtCelularCliente.Location = new System.Drawing.Point(25, 313);
-            this.txtCelularCliente.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.txtCelularCliente.Location = new System.Drawing.Point(33, 385);
+            this.txtCelularCliente.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.txtCelularCliente.Name = "txtCelularCliente";
             this.txtCelularCliente.PlaceholderText = "Celular";
             this.txtCelularCliente.SelectedText = "";
-            this.txtCelularCliente.Size = new System.Drawing.Size(325, 35);
+            this.txtCelularCliente.Size = new System.Drawing.Size(433, 43);
             this.txtCelularCliente.TabIndex = 28;
             // 
             // txtNombreCliente
@@ -1886,21 +1997,22 @@
             this.txtNombreCliente.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.txtNombreCliente.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtNombreCliente.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtNombreCliente.Location = new System.Drawing.Point(25, 270);
-            this.txtNombreCliente.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.txtNombreCliente.Location = new System.Drawing.Point(33, 332);
+            this.txtNombreCliente.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.txtNombreCliente.Name = "txtNombreCliente";
             this.txtNombreCliente.PlaceholderText = "Nombre y Apellido ";
             this.txtNombreCliente.SelectedText = "";
-            this.txtNombreCliente.Size = new System.Drawing.Size(325, 35);
+            this.txtNombreCliente.Size = new System.Drawing.Size(433, 43);
             this.txtNombreCliente.TabIndex = 27;
             // 
             // guna2HtmlLabel9
             // 
             this.guna2HtmlLabel9.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel9.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel9.Location = new System.Drawing.Point(48, 189);
+            this.guna2HtmlLabel9.Location = new System.Drawing.Point(64, 233);
+            this.guna2HtmlLabel9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel9.Name = "guna2HtmlLabel9";
-            this.guna2HtmlLabel9.Size = new System.Drawing.Size(161, 26);
+            this.guna2HtmlLabel9.Size = new System.Drawing.Size(204, 31);
             this.guna2HtmlLabel9.TabIndex = 26;
             this.guna2HtmlLabel9.Text = "Datos del Cliente";
             // 
@@ -1918,21 +2030,22 @@
             this.txtDNICliente.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.txtDNICliente.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtDNICliente.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtDNICliente.Location = new System.Drawing.Point(25, 227);
-            this.txtDNICliente.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.txtDNICliente.Location = new System.Drawing.Point(33, 279);
+            this.txtDNICliente.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.txtDNICliente.Name = "txtDNICliente";
             this.txtDNICliente.PlaceholderText = "DNI";
             this.txtDNICliente.SelectedText = "";
-            this.txtDNICliente.Size = new System.Drawing.Size(325, 35);
+            this.txtDNICliente.Size = new System.Drawing.Size(433, 43);
             this.txtDNICliente.TabIndex = 25;
             // 
             // guna2HtmlLabel8
             // 
             this.guna2HtmlLabel8.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel8.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel8.Location = new System.Drawing.Point(16, 161);
+            this.guna2HtmlLabel8.Location = new System.Drawing.Point(21, 198);
+            this.guna2HtmlLabel8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel8.Name = "guna2HtmlLabel8";
-            this.guna2HtmlLabel8.Size = new System.Drawing.Size(98, 22);
+            this.guna2HtmlLabel8.Size = new System.Drawing.Size(120, 27);
             this.guna2HtmlLabel8.TabIndex = 8;
             this.guna2HtmlLabel8.Text = "Atendido por:";
             // 
@@ -1940,9 +2053,10 @@
             // 
             this.guna2HtmlLabel7.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel7.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel7.Location = new System.Drawing.Point(16, 133);
+            this.guna2HtmlLabel7.Location = new System.Drawing.Point(21, 164);
+            this.guna2HtmlLabel7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel7.Name = "guna2HtmlLabel7";
-            this.guna2HtmlLabel7.Size = new System.Drawing.Size(102, 22);
+            this.guna2HtmlLabel7.Size = new System.Drawing.Size(126, 27);
             this.guna2HtmlLabel7.TabIndex = 7;
             this.guna2HtmlLabel7.Text = "Fecha y Hora:";
             // 
@@ -1950,9 +2064,10 @@
             // 
             this.guna2HtmlLabel6.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel6.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel6.Location = new System.Drawing.Point(16, 105);
+            this.guna2HtmlLabel6.Location = new System.Drawing.Point(21, 129);
+            this.guna2HtmlLabel6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel6.Name = "guna2HtmlLabel6";
-            this.guna2HtmlLabel6.Size = new System.Drawing.Size(46, 22);
+            this.guna2HtmlLabel6.Size = new System.Drawing.Size(58, 27);
             this.guna2HtmlLabel6.TabIndex = 6;
             this.guna2HtmlLabel6.Text = "Mesa:";
             // 
@@ -1960,9 +2075,10 @@
             // 
             this.guna2HtmlLabel5.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel5.Location = new System.Drawing.Point(16, 77);
+            this.guna2HtmlLabel5.Location = new System.Drawing.Point(21, 95);
+            this.guna2HtmlLabel5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel5.Name = "guna2HtmlLabel5";
-            this.guna2HtmlLabel5.Size = new System.Drawing.Size(111, 22);
+            this.guna2HtmlLabel5.Size = new System.Drawing.Size(139, 27);
             this.guna2HtmlLabel5.TabIndex = 5;
             this.guna2HtmlLabel5.Text = "Tipo de pedido:";
             // 
@@ -1970,9 +2086,10 @@
             // 
             this.guna2HtmlLabel4.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel4.Location = new System.Drawing.Point(16, 49);
+            this.guna2HtmlLabel4.Location = new System.Drawing.Point(21, 60);
+            this.guna2HtmlLabel4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel4.Name = "guna2HtmlLabel4";
-            this.guna2HtmlLabel4.Size = new System.Drawing.Size(137, 22);
+            this.guna2HtmlLabel4.Size = new System.Drawing.Size(169, 27);
             this.guna2HtmlLabel4.TabIndex = 4;
             this.guna2HtmlLabel4.Text = "Número de pedido:";
             // 
@@ -1980,9 +2097,10 @@
             // 
             this.guna2HtmlLabel3.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel3.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel3.Location = new System.Drawing.Point(48, 9);
+            this.guna2HtmlLabel3.Location = new System.Drawing.Point(64, 11);
+            this.guna2HtmlLabel3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel3.Name = "guna2HtmlLabel3";
-            this.guna2HtmlLabel3.Size = new System.Drawing.Size(219, 26);
+            this.guna2HtmlLabel3.Size = new System.Drawing.Size(274, 31);
             this.guna2HtmlLabel3.TabIndex = 4;
             this.guna2HtmlLabel3.Text = "Información del Pedido";
             // 
@@ -1992,7 +2110,7 @@
             this.guna2HtmlLabel44.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel44.Location = new System.Drawing.Point(144, 153);
             this.guna2HtmlLabel44.Name = "guna2HtmlLabel44";
-            this.guna2HtmlLabel44.Size = new System.Drawing.Size(132, 20);
+            this.guna2HtmlLabel44.Size = new System.Drawing.Size(162, 26);
             this.guna2HtmlLabel44.TabIndex = 37;
             this.guna2HtmlLabel44.Text = "RUC: 20601234567";
             // 
@@ -2002,7 +2120,7 @@
             this.guna2HtmlLabel43.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel43.Location = new System.Drawing.Point(107, 174);
             this.guna2HtmlLabel43.Name = "guna2HtmlLabel43";
-            this.guna2HtmlLabel43.Size = new System.Drawing.Size(202, 20);
+            this.guna2HtmlLabel43.Size = new System.Drawing.Size(259, 26);
             this.guna2HtmlLabel43.TabIndex = 38;
             this.guna2HtmlLabel43.Text = "Av. Principal 123 Trujillo - Perú";
             // 
@@ -2012,7 +2130,7 @@
             this.guna2HtmlLabel42.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel42.Location = new System.Drawing.Point(95, 129);
             this.guna2HtmlLabel42.Name = "guna2HtmlLabel42";
-            this.guna2HtmlLabel42.Size = new System.Drawing.Size(256, 26);
+            this.guna2HtmlLabel42.Size = new System.Drawing.Size(319, 31);
             this.guna2HtmlLabel42.TabIndex = 35;
             this.guna2HtmlLabel42.Text = "Al ESTILO PIURANO S.A.C";
             // 
@@ -2022,21 +2140,22 @@
             this.guna2HtmlLabel41.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel41.Location = new System.Drawing.Point(150, 194);
             this.guna2HtmlLabel41.Name = "guna2HtmlLabel41";
-            this.guna2HtmlLabel41.Size = new System.Drawing.Size(111, 20);
+            this.guna2HtmlLabel41.Size = new System.Drawing.Size(140, 26);
             this.guna2HtmlLabel41.TabIndex = 39;
             this.guna2HtmlLabel41.Text = "Tel: 987 654 321";
             // 
             // Generar_Boleta
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(1326, 913);
+            this.ClientSize = new System.Drawing.Size(1768, 1124);
             this.ControlBox = false;
             this.Controls.Add(this.guna2Panel1);
             this.Controls.Add(this.guna2Panel2);
             this.ForeColor = System.Drawing.Color.Black;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Generar_Boleta";
